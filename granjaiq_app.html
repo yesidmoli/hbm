@@ -2,672 +2,747 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GranjaIQ — Diagnóstico Porcícola</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #111008;
-  --bg2: #1C1810;
-  --bg3: #2A2218;
-  --bg4: #3A3025;
-  --oro: #C8960A;
-  --oro-light: #E8B020;
-  --oro-dim: rgba(200,150,10,0.15);
-  --verde: #2D6A4F;
-  --verde-g: #52B788;
-  --rojo: #C0392B;
-  --rojo-s: #E55039;
-  --amarillo: #D4A017;
-  --crema: #F0E6C8;
-  --crema-d: #A89878;
-  --blanco: #FAF6EC;
-  --borde: rgba(200,150,10,0.12);
-  --borde2: rgba(240,230,200,0.08);
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --bg:#111008;--bg2:#1C1810;--bg3:#2A2218;--bg4:#3A3025;
+  --oro:#C8960A;--oro-l:#E8B020;--oro-dim:rgba(200,150,10,0.14);
+  --verde:#2D6A4F;--vg:#52B788;
+  --rojo:#C0392B;--rs:#E55039;--am:#D4A017;
+  --cr:#F0E6C8;--cd:#A89878;--bl:#FAF6EC;
+  --bd:rgba(200,150,10,0.12);--bd2:rgba(240,230,200,0.08);
+  --bottom-nav-h:64px;
+  --topbar-h:60px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--crema);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
 
-/* LAYOUT */
+/* ── RESET ──────────────────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  background:var(--bg);color:var(--cr);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9000;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
 .app{display:flex;min-height:100vh}
-.sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--borde);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;transition:transform .3s}
-.main{margin-left:260px;flex:1;min-height:100vh}
 
-/* SIDEBAR */
-.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--borde)}
+/* ── SIDEBAR (desktop) ──────────────────────────────────── */
+.sidebar{
+  width:260px;background:var(--bg2);
+  border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;
+  z-index:200;transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sb-logo{padding:22px 20px 18px;border-bottom:1px solid var(--bd)}
 .sb-logo h1{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--oro);letter-spacing:-.5px}
-.sb-logo h1 span{color:var(--verde-g)}
-.sb-logo p{font-size:11px;color:var(--crema-d);margin-top:3px;letter-spacing:.3px}
-.sb-granja{padding:14px 20px;border-bottom:1px solid var(--borde);background:var(--oro-dim)}
-.sb-granja-name{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--blanco)}
-.sb-granja-sub{font-size:11px;color:var(--crema-d);margin-top:2px}
-.sb-nav{flex:1;padding:12px 0;overflow-y:auto}
-.sb-section{padding:8px 20px 4px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema-d);opacity:.6}
-.sb-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--crema-d);cursor:pointer;transition:all .15s;border-left:2px solid transparent;position:relative}
-.sb-item:hover{background:var(--bg3);color:var(--crema)}
-.sb-item.active{background:var(--bg3);color:var(--oro-light);border-left-color:var(--oro)}
-.sb-item.done .sb-check{color:var(--verde-g)}
-.sb-item .sb-num{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.sb-logo h1 span{color:var(--vg)}
+.sb-logo p{font-size:11px;color:var(--cd);margin-top:3px}
+.sb-farm{padding:13px 20px;border-bottom:1px solid var(--bd);background:var(--oro-dim)}
+.sb-farm-name{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--bl)}
+.sb-farm-sub{font-size:11px;color:var(--cd);margin-top:2px}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-sec{padding:8px 20px 4px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--cd);opacity:.55}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 20px;font-size:13px;color:var(--cd);
+  cursor:pointer;transition:all .15s;
+  border-left:2px solid transparent;
+}
+.sb-item:hover{background:var(--bg3);color:var(--cr)}
+.sb-item.active{background:var(--bg3);color:var(--oro-l);border-left-color:var(--oro)}
+.sb-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--bg4);display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;
+}
 .sb-item.active .sb-num{background:var(--oro);color:var(--bg)}
-.sb-item.done .sb-num{background:var(--verde);color:white}
-.sb-footer{padding:16px 20px;border-top:1px solid var(--borde)}
-.sb-progress{margin-bottom:8px}
-.sb-prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--crema-d);margin-bottom:6px}
-.sb-prog-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
-.sb-prog-fill{height:100%;background:linear-gradient(90deg,var(--verde),var(--verde-g));border-radius:2px;transition:width .4s ease}
+.sb-item.done .sb-num{background:var(--verde);color:#fff}
+.sb-footer{padding:14px 20px;border-top:1px solid var(--bd)}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--cd);margin-bottom:6px}
+.prog-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--verde),var(--vg));border-radius:2px;transition:width .4s}
 
-/* TOPBAR */
-.topbar{padding:16px 32px;border-bottom:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;background:rgba(17,16,8,.95);backdrop-filter:blur(10px);position:sticky;top:0;z-index:40}
-.topbar-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--blanco)}
-.topbar-sub{font-size:12px;color:var(--crema-d);margin-top:2px}
-.topbar-actions{display:flex;gap:10px;align-items:center}
-.badge{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:100px}
-.badge-oro{background:var(--oro-dim);color:var(--oro-light);border:1px solid rgba(200,150,10,.3)}
-.badge-verde{background:rgba(82,183,136,.1);color:var(--verde-g);border:1px solid rgba(82,183,136,.3)}
+/* ── MAIN ───────────────────────────────────────────────── */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
-/* CONTENT */
-.content{padding:32px}
-.section-card{background:var(--bg2);border:1px solid var(--borde);border-radius:14px;padding:28px;margin-bottom:20px}
-.section-card-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--blanco);margin-bottom:4px}
-.section-card-sub{font-size:13px;color:var(--crema-d);margin-bottom:24px;font-weight:300}
+/* ── TOPBAR ─────────────────────────────────────────────── */
+.topbar{
+  height:var(--topbar-h);
+  padding:0 28px;
+  border-bottom:1px solid var(--bd);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(17,16,8,.96);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.hamburger{
+  display:none;background:none;border:none;color:var(--cr);
+  font-size:20px;cursor:pointer;padding:6px;
+  border-radius:8px;transition:background .15s;line-height:1;
+}
+.hamburger:hover{background:var(--bg3)}
+.topbar-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--bl)}
+.topbar-sub{font-size:11px;color:var(--cd);margin-top:1px}
+.badge{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:5px 12px;border-radius:100px;white-space:nowrap}
+.badge-oro{background:var(--oro-dim);color:var(--oro-l);border:1px solid rgba(200,150,10,.3)}
+.badge-vg{background:rgba(82,183,136,.1);color:var(--vg);border:1px solid rgba(82,183,136,.3)}
 
-/* FORMS */
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-label{font-size:12px;font-weight:500;color:var(--crema-d);letter-spacing:.3px}
-.form-label span{color:var(--crema-d);font-weight:300;margin-left:4px;font-size:11px}
-.form-input{background:var(--bg3);border:1px solid var(--borde2);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--crema);outline:none;transition:border-color .2s;-moz-appearance:textfield}
-.form-input::-webkit-inner-spin-button,.form-input::-webkit-outer-spin-button{-webkit-appearance:none}
-.form-input:focus{border-color:rgba(200,150,10,.4);background:var(--bg4)}
-.form-input::placeholder{color:var(--crema-d);opacity:.5}
-.form-select{background:var(--bg3);border:1px solid var(--borde2);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--crema);outline:none;cursor:pointer;transition:border-color .2s}
-.form-select:focus{border-color:rgba(200,150,10,.4)}
-.form-select option{background:var(--bg3)}
+/* ── CONTENT ────────────────────────────────────────────── */
+.content{padding:24px 28px;flex:1}
 
-/* PARAM TABLE */
-.param-table{width:100%;border-collapse:collapse}
-.param-table th{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--crema-d);padding:10px 12px;text-align:left;border-bottom:1px solid var(--borde)}
-.param-table th.center{text-align:center}
-.param-table td{padding:8px 12px;border-bottom:1px solid var(--borde2);vertical-align:middle}
-.param-table tr:last-child td{border-bottom:none}
-.param-name{font-size:13px;color:var(--crema);font-weight:500}
-.param-unit{font-size:11px;color:var(--crema-d);margin-top:1px}
-.param-input{background:var(--bg3);border:1px solid var(--borde2);border-radius:6px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--crema);outline:none;width:100%;text-align:center;transition:border-color .2s;-moz-appearance:textfield}
-.param-input::-webkit-inner-spin-button,.param-input::-webkit-outer-spin-button{-webkit-appearance:none}
-.param-input:focus{border-color:rgba(200,150,10,.4);background:var(--bg4)}
-.param-input.historico:focus{border-color:rgba(82,183,136,.4)}
-.param-diff{font-size:12px;font-weight:600;text-align:center;min-width:60px}
-.diff-pos{color:var(--verde-g)}
-.diff-neg{color:var(--rojo-s)}
-.diff-neu{color:var(--crema-d)}
-.trend-icon{font-size:14px}
+/* ── CARDS ──────────────────────────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:24px;margin-bottom:16px}
+.card-title{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--bl);margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--cd);margin-bottom:22px;font-weight:300;line-height:1.55}
 
-/* DIETAS */
-.dieta-fase{background:var(--bg3);border:1px solid var(--borde2);border-radius:10px;padding:16px;margin-bottom:10px;position:relative}
-.dieta-fase-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.dieta-fase-title{font-size:13px;font-weight:600;color:var(--crema)}
-.dieta-fase-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
-.btn-add-fase{display:flex;align-items:center;gap:8px;background:transparent;border:1px dashed rgba(200,150,10,.3);border-radius:8px;padding:10px 16px;color:var(--oro-light);font-size:13px;cursor:pointer;transition:all .2s;width:100%;justify-content:center;font-family:'DM Sans',sans-serif;margin-top:8px}
-.btn-add-fase:hover{background:var(--oro-dim);border-color:var(--oro)}
-.btn-del{background:none;border:none;color:var(--crema-d);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;transition:color .2s;line-height:1}
-.btn-del:hover{color:var(--rojo-s)}
+/* ── FORM ───────────────────────────────────────────────── */
+.fg{display:grid;gap:14px}
+.fg-2{grid-template-columns:1fr 1fr}
+.fg-3{grid-template-columns:repeat(3,1fr)}
+.fg-auto{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.fgroup{display:flex;flex-direction:column;gap:6px}
+.flabel{font-size:12px;font-weight:500;color:var(--cd);letter-spacing:.2px}
+.flabel em{font-style:normal;font-weight:300;font-size:11px;margin-left:4px}
+.finput,.fselect{
+  background:var(--bg3);border:1px solid var(--bd2);
+  border-radius:9px;padding:12px 14px;
+  font-family:'DM Sans',sans-serif;font-size:15px;
+  color:var(--cr);outline:none;
+  transition:border-color .2s,background .2s;
+  width:100%;
+  -moz-appearance:textfield;
+  -webkit-appearance:none;appearance:none;
+}
+.finput::-webkit-inner-spin-button,.finput::-webkit-outer-spin-button{-webkit-appearance:none}
+.finput:focus,.fselect:focus{border-color:rgba(200,150,10,.5);background:var(--bg4)}
+.finput::placeholder{color:var(--cd);opacity:.45}
+.fselect{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A89878' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.fselect option{background:var(--bg3)}
 
-/* PLAN SANITARIO TOGGLE */
-.toggle-mode{display:flex;background:var(--bg3);border:1px solid var(--borde2);border-radius:8px;padding:3px;width:fit-content;margin-bottom:20px}
-.toggle-btn{padding:7px 18px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--crema-d);font-family:'DM Sans',sans-serif;transition:all .2s}
+/* ── BUTTONS ────────────────────────────────────────────── */
+.btn{
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  padding:13px 24px;border:none;border-radius:10px;
+  cursor:pointer;transition:all .2s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:48px;
+}
+.btn-primary{background:var(--oro);color:var(--bg)}
+.btn-primary:hover{background:var(--oro-l);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0);background:var(--oro)}
+.btn-secondary{background:transparent;color:var(--cr);border:1px solid var(--bd2)}
+.btn-secondary:hover{border-color:rgba(240,230,200,.3);background:var(--bg3)}
+.btn-ghost{background:transparent;color:var(--cd);padding:10px 16px}
+.btn-row{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap}
+.btn-full{width:100%}
+
+/* ── DIETA FASES ────────────────────────────────────────── */
+.fase{background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:14px;margin-bottom:8px}
+.fase-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.fase-name-input{flex:1;background:var(--bg4);border:1px solid var(--bd2);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--bl);outline:none}
+.fase-name-input:focus{border-color:rgba(200,150,10,.4)}
+.btn-del{background:none;border:none;color:var(--cd);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:6px;transition:color .2s;line-height:1;min-height:auto;flex-shrink:0}
+.btn-del:hover{color:var(--rs)}
+.fase-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fase-total{margin-top:8px;text-align:right;font-size:12px;color:var(--cd)}
+.fase-total span{color:var(--oro-l);font-weight:600;font-family:'Fraunces',serif}
+.btn-add{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:transparent;border:1px dashed rgba(200,150,10,.3);
+  border-radius:10px;padding:12px;color:var(--oro-l);
+  font-size:13px;cursor:pointer;transition:all .2s;
+  width:100%;font-family:'DM Sans',sans-serif;margin-top:6px;
+  min-height:44px;
+}
+.btn-add:hover{background:var(--oro-dim);border-color:var(--oro)}
+
+/* ── SANITARIO TOGGLE ───────────────────────────────────── */
+.toggle-mode{display:flex;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:3px;margin-bottom:18px}
+.toggle-btn{flex:1;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--cd);font-family:'DM Sans',sans-serif;transition:all .2s}
 .toggle-btn.active{background:var(--oro);color:var(--bg);font-weight:600}
 
-/* BUTTONS */
-.btn-primary{background:var(--oro);color:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:12px 28px;border:none;border-radius:8px;cursor:pointer;transition:all .2s}
-.btn-primary:hover{background:var(--oro-light);transform:translateY(-1px)}
-.btn-secondary{background:transparent;color:var(--crema);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:12px 24px;border:1px solid var(--borde2);border-radius:8px;cursor:pointer;transition:all .2s}
-.btn-secondary:hover{border-color:rgba(240,230,200,.3);background:var(--bg3)}
-.btn-row{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
-
-/* RESULTS */
-.result-hero{background:linear-gradient(135deg,rgba(192,57,43,.15),rgba(200,150,10,.08));border:1px solid rgba(192,57,43,.25);border-radius:16px;padding:32px;margin-bottom:24px;text-align:center;position:relative;overflow:hidden}
-.result-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(192,57,43,.12),transparent 70%);pointer-events:none}
-.result-total-label{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema-d);margin-bottom:10px}
-.result-total-num{font-family:'Fraunces',serif;font-size:64px;font-weight:900;color:var(--rojo-s);letter-spacing:-3px;line-height:1}
-.result-total-usd{font-size:16px;color:var(--crema-d);margin-top:8px;font-weight:300}
-.result-meta{display:flex;justify-content:center;gap:40px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06)}
-.result-meta-item{text-align:center}
-.result-meta-num{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--crema)}
-.result-meta-lbl{font-size:11px;color:var(--crema-d);text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
-.result-note{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--crema-d);margin-bottom:20px;line-height:1.6}
-.result-note strong{color:var(--oro-light)}
-
-/* RANKING */
-.ranking-item{display:grid;grid-template-columns:36px 1fr 130px 100px;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;margin-bottom:6px;background:var(--bg2);border:1px solid var(--borde2);transition:all .2s;cursor:default}
-.ranking-item:hover{background:var(--bg3);border-color:var(--borde)}
-.rank-pos{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.rp1{background:var(--rojo-s);color:white}
-.rp2{background:var(--amarillo);color:var(--bg)}
-.rp3{background:rgba(212,160,23,.35);color:var(--crema)}
-.rpn{background:var(--bg4);color:var(--crema-d)}
-.rank-info{}
-.rank-name{font-size:14px;font-weight:500;color:var(--blanco)}
-.rank-detail{font-size:11px;color:var(--crema-d);margin-top:2px}
-.rank-bar-wrap{display:flex;align-items:center;gap:8px}
-.rank-bar-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
-.rank-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
-.fill-danger{background:var(--rojo-s)}
-.fill-warning{background:var(--amarillo)}
-.fill-ok{background:var(--verde-g)}
-.rank-amount{font-family:'Fraunces',serif;font-size:15px;font-weight:700;text-align:right}
-.ra-danger{color:var(--rojo-s)}
-.ra-warning{color:var(--amarillo)}
-.ra-ok{color:var(--verde-g)}
-
-/* TABS */
-.tabs{display:flex;gap:2px;background:var(--bg3);border-radius:10px;padding:3px;width:fit-content;margin-bottom:24px}
-.tab{padding:8px 20px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--crema-d);font-family:'DM Sans',sans-serif;transition:all .2s}
-.tab.active{background:var(--bg2);color:var(--crema);box-shadow:0 1px 6px rgba(0,0,0,.3)}
-
-/* ALERTS */
-.alert-info{background:rgba(82,183,136,.06);border:1px solid rgba(82,183,136,.2);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--verde-g);margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
-
-/* DIVIDER */
-.divider{height:1px;background:var(--borde);margin:24px 0}
-
-/* MOBILE HAMBURGER */
-.hamburger{display:none;background:none;border:none;color:var(--crema);font-size:22px;cursor:pointer;padding:4px}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49}
-
-/* STEP INDICATOR */
-.step-indicator{display:flex;align-items:center;gap:0;margin-bottom:28px}
-.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .3s}
-.step-dot.done{background:var(--verde);color:white}
-.step-dot.active{background:var(--oro);color:var(--bg)}
-.step-dot.pending{background:var(--bg4);color:var(--crema-d)}
-.step-line{flex:1;height:2px;background:var(--bg4)}
-.step-line.done{background:var(--verde)}
-
-/* TOOLTIP */
-.tooltip-wrap{position:relative;display:inline-flex;align-items:center}
-.tooltip-icon{width:16px;height:16px;border-radius:50%;background:var(--bg4);color:var(--crema-d);font-size:10px;display:inline-flex;align-items:center;justify-content:center;cursor:help;margin-left:6px;border:1px solid var(--borde2);flex-shrink:0}
-.tooltip-text{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--borde);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--crema);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:200;min-width:160px;text-align:center;max-width:220px;white-space:normal;line-height:1.5}
-.tooltip-wrap:hover .tooltip-text{opacity:1}
-
-/* SUMMARY CARD */
-.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.summary-card{background:var(--bg3);border:1px solid var(--borde2);border-radius:10px;padding:16px}
-.summary-card-num{font-family:'Fraunces',serif;font-size:26px;font-weight:900;line-height:1}
-.summary-card-lbl{font-size:11px;color:var(--crema-d);text-transform:uppercase;letter-spacing:.7px;margin-top:5px}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .hamburger{display:block}
-  .overlay.show{display:block}
-  .content{padding:20px}
-  .form-grid{grid-template-columns:1fr}
-  .form-grid-2{grid-template-columns:1fr}
-  .dieta-fase-grid{grid-template-columns:1fr 1fr}
-  .ranking-item{grid-template-columns:32px 1fr 90px}
-  .rank-bar-wrap{display:none}
-  .result-total-num{font-size:48px}
-  .summary-grid{grid-template-columns:1fr 1fr}
+/* ── PARÁMETROS EN CARDS ────────────────────────────────── */
+.param-cards{display:flex;flex-direction:column;gap:10px}
+.param-card{
+  background:var(--bg3);border:1px solid var(--bd2);
+  border-radius:12px;padding:14px 16px;
 }
+.param-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.param-card-name{font-size:14px;font-weight:600;color:var(--bl);line-height:1.3}
+.param-card-unit{font-size:11px;color:var(--cd);margin-top:2px}
+.param-card-diff{font-size:13px;font-weight:700;text-align:right;flex-shrink:0;margin-left:8px}
+.diff-pos{color:var(--vg)}.diff-neg{color:var(--rs)}.diff-neu{color:var(--cd)}
+.param-card-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.param-input-wrap{display:flex;flex-direction:column;gap:4px}
+.param-input-lbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--cd)}
+.param-input-lbl.historico{color:var(--vg);opacity:.8}
+.param-input{
+  background:var(--bg4);border:1px solid var(--bd2);border-radius:8px;
+  padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:15px;
+  color:var(--cr);outline:none;width:100%;text-align:center;
+  transition:border-color .2s;-moz-appearance:textfield;
+  min-height:44px;
+}
+.param-input::-webkit-inner-spin-button,.param-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.param-input:focus{border-color:rgba(200,150,10,.5);background:var(--bg)}
+.param-input.hist:focus{border-color:rgba(82,183,136,.5)}
+.param-tooltip{font-size:11px;color:var(--cd);opacity:.7;margin-top:4px;font-style:italic}
+
+/* ── RESULTADOS ─────────────────────────────────────────── */
+.result-hero{
+  background:linear-gradient(135deg,rgba(192,57,43,.13),rgba(200,150,10,.07));
+  border:1px solid rgba(192,57,43,.22);
+  border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.result-hero::before{
+  content:'';position:absolute;top:-50px;right:-50px;
+  width:160px;height:160px;
+  background:radial-gradient(circle,rgba(192,57,43,.1),transparent 70%);
+  pointer-events:none;
+}
+.result-lbl{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--cd);margin-bottom:8px}
+.result-big{font-family:'Fraunces',serif;font-size:52px;font-weight:900;color:var(--rs);letter-spacing:-2px;line-height:1}
+.result-usd{font-size:14px;color:var(--cd);margin-top:6px;font-weight:300}
+.result-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06)}
+.rm-item{background:rgba(0,0,0,.2);border-radius:8px;padding:10px;text-align:center}
+.rm-num{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--cr)}
+.rm-lbl{font-size:10px;color:var(--cd);text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
+
+.result-note{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--cd);margin-bottom:14px;line-height:1.6}
+.result-note strong{color:var(--oro-l)}
+
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.sum-card{background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:14px 12px;text-align:center}
+.sum-num{font-family:'Fraunces',serif;font-size:20px;font-weight:900;line-height:1}
+.sum-lbl{font-size:10px;color:var(--cd);text-transform:uppercase;letter-spacing:.6px;margin-top:5px}
+
+.rank-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:10px;
+  background:var(--bg2);border:1px solid var(--bd2);
+  margin-bottom:6px;
+}
+.rank-pos{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.rp1{background:var(--rs);color:#fff}.rp2{background:var(--am);color:var(--bg)}.rp3{background:rgba(212,160,23,.35);color:var(--cr)}.rpn{background:var(--bg4);color:var(--cd)}
+.rank-body{flex:1;min-width:0}
+.rank-name{font-size:13px;font-weight:500;color:var(--bl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-detail{font-size:11px;color:var(--cd);margin-top:2px}
+.rank-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:6px}
+.rank-bar-fill{height:100%;border-radius:2px}
+.fill-danger{background:var(--rs)}.fill-warning{background:var(--am)}.fill-ok{background:var(--vg)}
+.rank-amt{font-family:'Fraunces',serif;font-size:14px;font-weight:700;flex-shrink:0;text-align:right;min-width:70px}
+.ra-danger{color:var(--rs)}.ra-warning{color:var(--am)}.ra-ok{color:var(--vg)}
+
+.cost-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--bd2);margin-bottom:6px}
+.cost-lbl{font-size:13px;color:var(--cd)}
+.cost-val{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--cr)}
+.cost-pct{font-size:11px;color:var(--cd);font-family:'DM Sans',sans-serif;margin-left:4px}
+.cost-total{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg3);border-radius:10px;border:1px solid var(--bd);margin-top:8px}
+
+/* ── ALERT ──────────────────────────────────────────────── */
+.alert{border-radius:10px;padding:12px 14px;font-size:12px;margin-bottom:14px;line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.alert-info{background:rgba(82,183,136,.06);border:1px solid rgba(82,183,136,.2);color:var(--vg)}
+.alert-warn{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);color:var(--am)}
+
+/* ── DIVIDER ────────────────────────────────────────────── */
+.divider{height:1px;background:var(--bd);margin:20px 0}
+
+/* ── OVERLAY ────────────────────────────────────────────── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.65);z-index:199;
+  backdrop-filter:blur(2px);
+}
+.overlay.show{display:block}
+
+/* ── BOTTOM NAV (mobile only) ───────────────────────────── */
+.bottom-nav{display:none}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE FIRST
+   ═══════════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* Sidebar slides in from left */
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 32px rgba(0,0,0,.6)}
+  .hamburger{display:flex}
+  
+  /* Main takes full width */
+  .main{margin-left:0}
+  
+  /* Topbar compact */
+  .topbar{padding:0 16px;height:56px}
+  .topbar-title{font-size:15px}
+  .topbar-sub{display:none}
+  
+  /* Content with bottom nav clearance */
+  .content{
+    padding:16px 14px;
+    padding-bottom:calc(var(--bottom-nav-h) + 16px);
+  }
+  
+  /* Cards */
+  .card{padding:18px 16px;border-radius:12px;margin-bottom:12px}
+  .card-title{font-size:15px}
+  .card-sub{font-size:12px;margin-bottom:16px}
+  
+  /* Forms */
+  .fg-2,.fg-3,.fg-auto{grid-template-columns:1fr}
+  .fg-2-mobile{grid-template-columns:1fr 1fr}
+  
+  /* Inputs bigger tap targets */
+  .finput,.fselect{font-size:16px;padding:13px 14px;min-height:50px}
+  
+  /* Buttons full width on mobile */
+  .btn-row{flex-direction:column-reverse}
+  .btn-row .btn{width:100%;justify-content:center}
+  
+  /* Fase grid */
+  .fase-grid{grid-template-columns:1fr 1fr}
+  
+  /* Param cards */
+  .param-input{min-height:50px;font-size:16px}
+  
+  /* Results */
+  .result-big{font-size:44px}
+  .result-meta{grid-template-columns:repeat(2,1fr)}
+  .sum-grid{grid-template-columns:repeat(3,1fr)}
+  .sum-num{font-size:16px}
+  .sum-lbl{font-size:9px}
+  
+  /* Ranking */
+  .rank-item{padding:12px}
+  .rank-bar{display:none}
+  
+  /* Cost rows */
+  .cost-row{flex-direction:row}
+  
+  /* Bottom navigation */
+  .bottom-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    height:var(--bottom-nav-h);
+    background:rgba(28,24,16,.98);
+    border-top:1px solid var(--bd);
+    z-index:300;
+    backdrop-filter:blur(16px);
+  }
+  .bn-item{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:4px;cursor:pointer;
+    padding:8px 4px;
+    transition:all .15s;
+    border:none;background:none;color:var(--cd);
+    font-family:'DM Sans',sans-serif;
+  }
+  .bn-item.active{color:var(--oro-l)}
+  .bn-icon{font-size:20px;line-height:1}
+  .bn-label{font-size:9px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .bn-dot{
+    position:absolute;top:6px;right:calc(50% - 18px);
+    width:6px;height:6px;border-radius:50%;
+    background:var(--vg);
+  }
+  .bn-item{position:relative}
+}
+
+@media(min-width:769px){
+  /* desktop: hide bottom nav */
+  .bottom-nav{display:none !important}
+}
+
+/* ── STEP PILLS ─────────────────────────────────────────── */
+.step-pills{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.step-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:100px;font-size:12px;font-weight:500;
+  border:1px solid var(--bd2);color:var(--cd);background:var(--bg3);
+  white-space:nowrap;
+}
+.step-pill.active{background:var(--oro-dim);border-color:rgba(200,150,10,.4);color:var(--oro-l)}
+.step-pill.done{background:rgba(45,106,79,.15);border-color:rgba(82,183,136,.3);color:var(--vg)}
+.step-pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 </style>
 </head>
 <body>
-
 <div class="app">
-  <!-- SIDEBAR -->
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
   <aside class="sidebar" id="sidebar">
     <div class="sb-logo">
       <h1>Granja<span>IQ</span></h1>
       <p>Diagnóstico Porcícola</p>
     </div>
-    <div class="sb-granja" id="sb-granja-info">
-      <div class="sb-granja-name" id="sb-farm-name">Nueva Granja</div>
-      <div class="sb-granja-sub" id="sb-farm-sub">Sin configurar</div>
+    <div class="sb-farm">
+      <div class="sb-farm-name" id="sb-farm-name">Nueva Granja</div>
+      <div class="sb-farm-sub" id="sb-farm-sub">Sin configurar</div>
     </div>
     <nav class="sb-nav">
-      <div class="sb-section">Configuración</div>
+      <div class="sb-sec">Configuración</div>
       <div class="sb-item active" onclick="goTo('granja')" id="nav-granja">
-        <div class="sb-num">1</div><span>Mi Granja</span>
+        <div class="sb-num" id="sbn-granja">1</div><span>Mi Granja</span>
       </div>
       <div class="sb-item" onclick="goTo('genetica')" id="nav-genetica">
-        <div class="sb-num">2</div><span>Genética & Semen</span>
+        <div class="sb-num" id="sbn-genetica">2</div><span>Genética & Semen</span>
       </div>
       <div class="sb-item" onclick="goTo('dietas')" id="nav-dietas">
-        <div class="sb-num">3</div><span>Dietas</span>
+        <div class="sb-num" id="sbn-dietas">3</div><span>Dietas</span>
       </div>
       <div class="sb-item" onclick="goTo('sanitario')" id="nav-sanitario">
-        <div class="sb-num">4</div><span>Plan Sanitario</span>
+        <div class="sb-num" id="sbn-sanitario">4</div><span>Plan Sanitario</span>
       </div>
-      <div class="sb-section">Diagnóstico</div>
+      <div class="sb-sec">Diagnóstico</div>
       <div class="sb-item" onclick="goTo('parametros')" id="nav-parametros">
-        <div class="sb-num">5</div><span>Parámetros</span>
+        <div class="sb-num" id="sbn-parametros">5</div><span>Parámetros</span>
       </div>
       <div class="sb-item" onclick="goTo('resultados')" id="nav-resultados">
-        <div class="sb-num">6</div><span>Resultados</span>
+        <div class="sb-num" id="sbn-resultados">6</div><span>Resultados</span>
       </div>
     </nav>
     <div class="sb-footer">
-      <div class="sb-progress">
-        <div class="sb-prog-label">
-          <span>Progreso</span>
-          <span id="prog-pct">0%</span>
-        </div>
-        <div class="sb-prog-track">
-          <div class="sb-prog-fill" id="prog-fill" style="width:0%"></div>
-        </div>
+      <div class="prog-label">
+        <span>Progreso</span><span id="prog-pct">0%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="prog-fill" style="width:0%"></div>
       </div>
     </div>
   </aside>
 
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-  <!-- MAIN -->
+  <!-- ── MAIN ───────────────────────────────────────── -->
   <main class="main">
     <div class="topbar">
-      <div>
+      <div class="topbar-left">
         <button class="hamburger" onclick="toggleSidebar()">☰</button>
-        <div class="topbar-title" id="topbar-title">Mi Granja</div>
-        <div class="topbar-sub" id="topbar-sub">Paso 1 de 6 — Configura tu granja</div>
+        <div>
+          <div class="topbar-title" id="topbar-title">Mi Granja</div>
+          <div class="topbar-sub" id="topbar-sub">Paso 1 de 6</div>
+        </div>
       </div>
-      <div class="topbar-actions">
-        <span class="badge badge-oro" id="topbar-badge">En progreso</span>
-      </div>
+      <span class="badge badge-oro" id="topbar-badge">En progreso</span>
     </div>
 
-    <div class="content" id="content">
-      <!-- Rendered by JS -->
-    </div>
+    <div class="content" id="content"></div>
   </main>
+
+  <!-- ── BOTTOM NAV (mobile) ────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="bn-item active" id="bn-granja" onclick="goTo('granja')">
+      <span class="bn-icon">🏡</span>
+      <span class="bn-label">Granja</span>
+    </button>
+    <button class="bn-item" id="bn-genetica" onclick="goTo('genetica')">
+      <span class="bn-icon">🧬</span>
+      <span class="bn-label">Genética</span>
+    </button>
+    <button class="bn-item" id="bn-dietas" onclick="goTo('dietas')">
+      <span class="bn-icon">🌾</span>
+      <span class="bn-label">Dietas</span>
+    </button>
+    <button class="bn-item" id="bn-sanitario" onclick="goTo('sanitario')">
+      <span class="bn-icon">💉</span>
+      <span class="bn-label">Sanidad</span>
+    </button>
+    <button class="bn-item" id="bn-parametros" onclick="goTo('parametros')">
+      <span class="bn-icon">📊</span>
+      <span class="bn-label">Datos</span>
+    </button>
+    <button class="bn-item" id="bn-resultados" onclick="goTo('resultados')">
+      <span class="bn-icon">💰</span>
+      <span class="bn-label">Resultado</span>
+    </button>
+  </nav>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 const state = {
-  currentPage: 'granja',
-  completedSteps: new Set(),
-
-  granja: {
-    nombre: '',
-    hembras: '',
-    pais: 'CO',
-    moneda: 'COP',
-    trm: 4200,
-    precio_kilo: 9200,
-  },
-
-  genetica: {
-    costo_primeriza: 1400000,
-    edad_compra: 120,
-    edad_monta: 230,
-    descarte_primer_anio: 0.10,
-    partos_diferir: 6,
-    pct_precio_descarte: 0.60,
-    tasa_reemplazo: 0.415,
-  },
-
-  semen: {
-    botellas_por_servicio: 2.5,
-    precio_botella: 20000,
-  },
-
+  page: 'granja',
+  done: new Set(),
+  granja:   { nombre:'', hembras:'', pais:'CO', moneda:'COP', trm:4200, precio_kilo:9200 },
+  genetica: { costo_primeriza:1400000, edad_compra:120, edad_monta:230, descarte_primer_anio:0.10, partos_diferir:6, pct_precio_descarte:0.60, tasa_reemplazo:0.415 },
+  semen:    { botellas_por_servicio:2.5, precio_botella:20000 },
   dietas: {
-    madres: [
-      { nombre: 'Gestación 1er tercio', dias: 30, consumo: 2.0, precio: 1550 },
-      { nombre: 'Gestación 2do tercio', dias: 55, consumo: 2.0, precio: 1550 },
-      { nombre: 'Gestación preparto', dias: 30, consumo: 3.0, precio: 1781 },
-      { nombre: 'Lactancia', dias: 22.45, consumo: 6.5, precio: 1949 },
-      { nombre: 'Flushing / Destete-Monta', dias: 5, consumo: 4.0, precio: 1949 },
+    madres:[
+      {nombre:'Gestación 1er tercio', dias:30,    consumo:2.0, precio:1550},
+      {nombre:'Gestación 2do tercio', dias:55,    consumo:2.0, precio:1550},
+      {nombre:'Gestación preparto',   dias:30,    consumo:3.0, precio:1781},
+      {nombre:'Lactancia',            dias:22.45, consumo:6.5, precio:1949},
+      {nombre:'Flushing / D-Monta',   dias:5,     consumo:4.0, precio:1949},
     ],
-    precebos: [
-      { nombre: 'Fase 1', dias: 7, consumo: 0.243, precio: 3833 },
-      { nombre: 'Fase 2', dias: 14, consumo: 0.786, precio: 3109 },
-      { nombre: 'Fase 3', dias: 22.81, consumo: 0.712, precio: 2254 },
+    precebos:[
+      {nombre:'Fase 1', dias:7,     consumo:0.243, precio:3833},
+      {nombre:'Fase 2', dias:14,    consumo:0.786, precio:3109},
+      {nombre:'Fase 3', dias:22.81, consumo:0.712, precio:2254},
     ],
-    ceba: [
-      { nombre: 'Iniciador', dias: 28, consumo: 1.6, precio: 1828 },
-      { nombre: 'Levante', dias: 41.88, consumo: 2.0, precio: 1805 },
-      { nombre: 'Engorde', dias: 28, consumo: 2.28, precio: 1714 },
+    ceba:[
+      {nombre:'Iniciador', dias:28,    consumo:1.6,  precio:1828},
+      {nombre:'Levante',   dias:41.88, consumo:2.0,  precio:1805},
+      {nombre:'Engorde',   dias:28,    consumo:2.28, precio:1714},
     ],
-    flete: 40,
+    flete:40,
   },
-
   sanitario: {
-    modo: 'simple', // 'simple' | 'detallado'
-    simple: {
-      primeriza: 44904,
-      gestacion: 6648,
-      lactancia: 12856,
-      precebos: 5542,
-      ceba: 10922,
-      pct_bioseguridad: 0.20,
-    },
-    detallado: {
-      remplazos: [],
-      gestacion: [],
-      lactancia: [],
-      precebos: [],
-      ceba: [],
-    },
+    modo:'simple',
+    simple:{ primeriza:44904, gestacion:6648, lactancia:12856, precebos:5542, ceba:10922, pct_bioseguridad:0.20 },
+    detallado:{ remplazos:[], gestacion:[], lactancia:[], precebos:[], ceba:[] },
   },
-
-  // ADMIN DEFAULTS (controlled by super admin in real app)
   admin: {
-    largo_gestacion: 115,
-    largo_lactancia: 22.45,
-    dias_abiertos: 5,
-    partos_semanales: 8,
-    infertilidad_dist: { d21: 0.5, d42: 0.3, d63: 0.05, d85: 0.15 },
-    salario_minimo: 1300000,
-    cargas: 0.5937,
-    cerdas_gestacion_x_operario: 100,
-    cerdas_paridas_x_operario: 20,
-    cerdos_destete_x_operario: 1000,
-    infra_hembra: 6000000,
-    infra_precebo: 600000,
-    infra_ceba: 750000,
-    pct_mant_cria: 0.012,
-    pct_mant_precebo: 0.004,
-    pct_mant_ceba: 0.002,
-    pct_admon: 1.6277,
-    operarios_cria: 2,
-    operarios_destete: 2,
+    largo_gestacion:115, largo_lactancia:22.45, dias_abiertos:5,
+    partos_semanales:8,
+    infert_dist:{ d21:0.5, d42:0.3, d63:0.05, d85:0.15 },
+    salario_minimo:1300000, cargas:0.5937, dotacion:723468,
+    cerdas_gest_x_op:100, cerdas_par_x_op:20, cerdos_dest_x_op:1000,
+    infra_hembra:6000000, infra_prec:600000, infra_ceba:750000,
+    pct_mant_cria:0.012, pct_mant_prec:0.004, pct_mant_ceba:0.002,
+    pct_admon:1.6277,
   },
-
   params: {
     actual: {
-      fertilidad: 0.8153,
-      nacidos_totales: 13.52,
-      pct_momias: 2.47,
-      pct_nacidos_muertos: 5.23,
-      pct_mort_lactancia: 8.51,
-      peso_destete: 6.04,
-      conv_precebos: 1.45,
-      pct_mort_jaulones: 3.31,
-      peso_salida_precebos: 26.0,
-      conv_ceba: 2.30,
-      pct_mort_ceba: 1.69,
-      peso_venta: 109.65,
-      dias_abiertos: 5,
-      tasa_reemplazo: 41.5,
+      fertilidad:0.8153, nacidos_totales:13.52, pct_momias:2.47, pct_nacidos_muertos:5.23,
+      pct_mort_lactancia:8.51, peso_destete:6.04, conv_precebos:1.45, pct_mort_jaulones:3.31,
+      peso_salida_precebos:26.0, conv_ceba:2.30, pct_mort_ceba:1.69, peso_venta:109.65,
+      dias_abiertos:5, tasa_reemplazo:41.5,
     },
     historico: {
-      fertilidad: 0.8974,
-      nacidos_totales: 14.59,
-      pct_momias: 1.45,
-      pct_nacidos_muertos: 3.13,
-      pct_mort_lactancia: 5.41,
-      peso_destete: 6.34,
-      conv_precebos: 1.41,
-      pct_mort_jaulones: 0.56,
-      peso_salida_precebos: 27.92,
-      conv_ceba: 2.23,
-      pct_mort_ceba: 0.69,
-      peso_venta: 114.14,
-      dias_abiertos: 4,
-      tasa_reemplazo: 38.0,
+      fertilidad:0.8974, nacidos_totales:14.59, pct_momias:1.45, pct_nacidos_muertos:3.13,
+      pct_mort_lactancia:5.41, peso_destete:6.34, conv_precebos:1.41, pct_mort_jaulones:0.56,
+      peso_salida_precebos:27.92, conv_ceba:2.23, pct_mort_ceba:0.69, peso_venta:114.14,
+      dias_abiertos:4, tasa_reemplazo:38.0,
     },
   },
 };
 
-const PARAM_META = [
-  { key: 'fertilidad', nombre: 'Fertilidad', unidad: '%', desc: '% de servicios que resultan en parto exitoso', tipo: 'pct_direct', higherIsBetter: true },
-  { key: 'nacidos_totales', nombre: 'Nacidos totales / parto', unidad: 'lechones', desc: 'Total de lechones nacidos por parto incluyendo momias y muertos', tipo: 'num', higherIsBetter: true },
-  { key: 'pct_momias', nombre: '% Momias', unidad: '%', desc: 'Porcentaje de momias sobre total nacidos', tipo: 'pct', higherIsBetter: false },
-  { key: 'pct_nacidos_muertos', nombre: '% Nacidos muertos', unidad: '%', desc: 'Porcentaje de nacidos muertos sobre total nacidos', tipo: 'pct', higherIsBetter: false },
-  { key: 'pct_mort_lactancia', nombre: '% Mortalidad lactancia', unidad: '%', desc: 'Mortalidad de lechones durante la lactancia', tipo: 'pct', higherIsBetter: false },
-  { key: 'peso_destete', nombre: 'Peso al destete', unidad: 'kg', desc: 'Peso promedio del lechón al momento del destete', tipo: 'num', higherIsBetter: true },
-  { key: 'conv_precebos', nombre: 'Conversión en precebos', unidad: 'kg/kg', desc: 'Kg de alimento por kg de aumento en jaulones', tipo: 'num', higherIsBetter: false },
-  { key: 'pct_mort_jaulones', nombre: '% Mortalidad jaulones', unidad: '%', desc: 'Mortalidad de lechones en la etapa de precebos', tipo: 'pct', higherIsBetter: false },
-  { key: 'peso_salida_precebos', nombre: 'Peso salida precebos', unidad: 'kg', desc: 'Peso promedio al trasladar a la etapa de ceba', tipo: 'num', higherIsBetter: true },
-  { key: 'conv_ceba', nombre: 'Conversión en ceba', unidad: 'kg/kg', desc: 'Kg de alimento por kg de aumento en engorde', tipo: 'num', higherIsBetter: false },
-  { key: 'pct_mort_ceba', nombre: '% Mortalidad en ceba', unidad: '%', desc: 'Mortalidad de cerdos durante la etapa de engorde', tipo: 'pct', higherIsBetter: false },
-  { key: 'peso_venta', nombre: 'Peso de venta', unidad: 'kg', desc: 'Peso promedio del cerdo gordo al momento de la venta', tipo: 'num', higherIsBetter: true },
-  { key: 'dias_abiertos', nombre: 'Días abiertos normales', unidad: 'días', desc: 'Días entre destete y siguiente monta efectiva', tipo: 'num', higherIsBetter: false },
-  { key: 'tasa_reemplazo', nombre: 'Tasa de reemplazo', unidad: '%', desc: 'Porcentaje de hembras reemplazadas por año', tipo: 'pct', higherIsBetter: false },
+const PARAMS = [
+  {key:'fertilidad',           nom:'Fertilidad',              un:'%',     desc:'% de servicios que resultan en parto', hib:true},
+  {key:'nacidos_totales',      nom:'Nacidos totales / parto',  un:'lech.', desc:'Total nacidos incluyendo momias y muertos', hib:true},
+  {key:'pct_momias',           nom:'% Momias',                 un:'%',     desc:'% de momias sobre total nacidos', hib:false},
+  {key:'pct_nacidos_muertos',  nom:'% Nacidos muertos',        un:'%',     desc:'% de nacidos muertos sobre total', hib:false},
+  {key:'pct_mort_lactancia',   nom:'% Mort. lactancia',        un:'%',     desc:'Mortalidad en lactancia', hib:false},
+  {key:'peso_destete',         nom:'Peso al destete',          un:'kg',    desc:'Peso promedio del lechón al destete', hib:true},
+  {key:'conv_precebos',        nom:'Conversión precebos',      un:'kg/kg', desc:'Kg alimento por kg de aumento', hib:false},
+  {key:'pct_mort_jaulones',    nom:'% Mort. jaulones',         un:'%',     desc:'Mortalidad en precebos/jaulones', hib:false},
+  {key:'peso_salida_precebos', nom:'Peso salida precebos',     un:'kg',    desc:'Peso al trasladar a ceba', hib:true},
+  {key:'conv_ceba',            nom:'Conversión en ceba',       un:'kg/kg', desc:'Kg alimento por kg de aumento en engorde', hib:false},
+  {key:'pct_mort_ceba',        nom:'% Mort. en ceba',          un:'%',     desc:'Mortalidad en engorde', hib:false},
+  {key:'peso_venta',           nom:'Peso de venta',            un:'kg',    desc:'Peso promedio cerdo gordo a venta', hib:true},
+  {key:'dias_abiertos',        nom:'Días abiertos normales',   un:'días',  desc:'Días entre destete y siguiente monta', hib:false},
+  {key:'tasa_reemplazo',       nom:'Tasa de reemplazo',        un:'%',     desc:'% hembras reemplazadas por año', hib:false},
 ];
 
 const MONEDAS = {
-  COP: { simbolo: '$', nombre: 'Peso colombiano', decimales: 0 },
-  USD: { simbolo: 'US$', nombre: 'Dólar americano', decimales: 2 },
-  MXN: { simbolo: '$', nombre: 'Peso mexicano', decimales: 0 },
-  BRL: { simbolo: 'R$', nombre: 'Real brasileño', decimales: 2 },
-  ARS: { simbolo: '$', nombre: 'Peso argentino', decimales: 0 },
-  CLP: { simbolo: '$', nombre: 'Peso chileno', decimales: 0 },
-  PEN: { simbolo: 'S/', nombre: 'Sol peruano', decimales: 2 },
-  EUR: { simbolo: '€', nombre: 'Euro', decimales: 2 },
+  COP:{s:'$',n:'Peso colombiano',d:0},
+  USD:{s:'US$',n:'Dólar americano',d:2},
+  MXN:{s:'$',n:'Peso mexicano',d:0},
+  BRL:{s:'R$',n:'Real brasileño',d:2},
+  ARS:{s:'$',n:'Peso argentino',d:0},
+  CLP:{s:'$',n:'Peso chileno',d:0},
+  PEN:{s:'S/',n:'Sol peruano',d:2},
+  EUR:{s:'€',n:'Euro',d:2},
 };
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // MATH ENGINE
-// ═══════════════════════════════════════════════════════
-function calcularGranja(params, granja, genetica, semen, dietas, sanitario, admin) {
-  const h = parseFloat(granja.hembras) || 168;
-  const precioKilo = parseFloat(granja.precio_kilo) || 9200;
-  const fleteKg = parseFloat(dietas.flete) || 40;
-
-  // Parámetros
-  const fertilidad = params.fertilidad;
-  const infertilidad = 1 - fertilidad;
-  const nacidosTotales = params.nacidos_totales;
-  const pctMomias = params.pct_momias / 100;
-  const pctMuertos = params.pct_nacidos_muertos / 100;
-  const pctMortLact = params.pct_mort_lactancia / 100;
-  const pesDestete = params.peso_destete;
-  const convPrecebos = params.conv_precebos;
-  const pctMortJaul = params.pct_mort_jaulones / 100;
-  const pesoSalidaPrec = params.peso_salida_precebos;
-  const convCeba = params.conv_ceba;
-  const pctMortCeba = params.pct_mort_ceba / 100;
-  const pesoVenta = params.peso_venta;
-  const diasAbiertos = params.dias_abiertos;
+// ══════════════════════════════════════════════════════════
+function calc(params, g, gen, sem, diet, san, adm) {
+  const h      = parseFloat(g.hembras) || 168;
+  const pk     = parseFloat(g.precio_kilo) || 9200;
+  const flete  = parseFloat(diet.flete) || 40;
+  const fert   = params.fertilidad;
+  const infert = 1 - fert;
 
   // Ciclo reproductivo
-  const largoCiclo = admin.largo_gestacion + admin.largo_lactancia + diasAbiertos;
-  // Días improductivos por infertilidad
-  const diasImproductivos = (infertilidad / fertilidad) *
-    (admin.infertilidad_dist.d21 * 21 + admin.infertilidad_dist.d42 * 42 +
-     admin.infertilidad_dist.d63 * 63 + admin.infertilidad_dist.d85 * 85);
-  const cicloPorHembra = largoCiclo + diasImproductivos / (365 / largoCiclo);
-  const partosPorHembra = 365 / cicloPorHembra;
+  const prom_dias_infert = adm.infert_dist.d21*21 + adm.infert_dist.d42*42 + adm.infert_dist.d63*63 + adm.infert_dist.d85*85;
+  const ciclo_base = adm.largo_gestacion + adm.largo_lactancia + params.dias_abiertos;
+  const dias_improd_ciclo = infert * prom_dias_infert;
+  const ciclo_real = ciclo_base + dias_improd_ciclo;
+  const partos_h = 365 / ciclo_real;
 
   // Flujo productivo
-  const nacidosVivos = nacidosTotales * (1 - pctMomias - pctMuertos);
-  const desTosParto = nacidosVivos * (1 - pctMortLact);
-  const destHembraAnio = desTosParto * partosPorHembra;
-  const totalDestetos = destHembraAnio * h;
+  const partos_anio   = adm.partos_semanales * 52;
+  const nv            = params.nacidos_totales * (1 - params.pct_momias/100 - params.pct_nacidos_muertos/100);
+  const dest_parto    = nv * (1 - params.pct_mort_lactancia/100);
+  const total_dest    = dest_parto * partos_h * h;
+  const traslados     = total_dest * (1 - params.pct_mort_jaulones/100);
+  const cerdos_vend   = traslados * (1 - params.pct_mort_ceba/100);
+  const kilos_vend    = cerdos_vend * params.peso_venta;
 
-  const traslados = totalDestetos * (1 - pctMortJaul);
-  const cerdosVendidos = traslados * (1 - pctMortCeba);
-  const kilosVendidos = cerdosVendidos * pesoVenta;
-  const ingresos = kilosVendidos * precioKilo;
+  // Alimento madres
+  const costo_ciclo_madres = diet.madres.reduce((s,f) => s + f.dias*f.consumo*f.precio, 0);
+  const costo_dia_madres   = costo_ciclo_madres / ciclo_real;
+  const dias_improd_h      = partos_anio * infert * prom_dias_infert / h;
+  const costo_alim_madre   = costo_dia_madres * (365 + dias_improd_h);
+  const costo_cria_xc      = (costo_alim_madre * h) / (cerdos_vend || 1);
 
-  // COSTOS DE ALIMENTO — MADRES (por hembra/año)
-  let costoAlimentoMadres = 0;
-  for (const fase of dietas.madres) {
-    costoAlimentoMadres += (fase.dias * fase.consumo * (fase.precio + fleteKg)) * partosPorHembra;
+  // Alimento precebos y ceba (precios sin flete separado — usuario ingresa precio neto)
+  const costo_prec_xc = diet.precebos.reduce((s,f) => s + f.dias*f.consumo*f.precio, 0);
+  const costo_ceba_xc = diet.ceba.reduce((s,f) => s + f.dias*f.consumo*f.precio, 0);
+  // Flete aplica al total
+  const flete_xc_total = (diet.madres.reduce((s,f)=>s+f.dias*f.consumo,0)*partos_h*h/cerdos_vend +
+                          diet.precebos.reduce((s,f)=>s+f.dias*f.consumo,0) +
+                          diet.ceba.reduce((s,f)=>s+f.dias*f.consumo,0)) * flete;
+
+  // Semen
+  const montas_infert   = partos_anio * infert;
+  const total_serv      = partos_anio + montas_infert;
+  const costo_sem_anio  = total_serv * sem.botellas_por_servicio * sem.precio_botella;
+  const costo_sem_xc    = costo_sem_anio / (cerdos_vend || 1);
+
+  // Genética
+  const venta_descarte  = 235 * pk * gen.pct_precio_descarte;
+  const costo_diferir   = gen.costo_primeriza - venta_descarte;
+  const costo_gen_h_anio= (costo_diferir / gen.partos_diferir) * partos_h * gen.tasa_reemplazo;
+  const costo_gen_xc    = (costo_gen_h_anio * h) / (cerdos_vend || 1);
+
+  // Plan sanitario
+  let san_xc = 0;
+  if (san.modo === 'simple') {
+    const s = san.simple, bio = 1 + (s.pct_bioseguridad || 0.2);
+    san_xc = ((s.primeriza + s.gestacion + s.lactancia) * bio * gen.tasa_reemplazo * h / (cerdos_vend||1))
+            + s.precebos * bio + s.ceba * bio;
+  } else {
+    const sumEtapa = (arr) => arr.reduce((s,i) => s + i.precio * i.cantidad, 0) * 1.2;
+    san_xc = (sumEtapa(san.detallado.remplazos) + sumEtapa(san.detallado.gestacion) + sumEtapa(san.detallado.lactancia)) * h / (cerdos_vend||1)
+            + sumEtapa(san.detallado.precebos) + sumEtapa(san.detallado.ceba);
   }
-  // Improductividad
-  const consumoPromedioMadre = dietas.madres.reduce((s, f) => s + f.dias * f.consumo, 0) /
-    dietas.madres.reduce((s, f) => s + f.dias, 1);
-  costoAlimentoMadres += diasImproductivos * consumoPromedioMadre *
-    (dietas.madres[0]?.precio + fleteKg || 1550);
 
-  // COSTOS DE ALIMENTO — PRECEBOS (por cerdo)
-  let costoAlimentoPrecebos = 0;
-  for (const fase of dietas.precebos) {
-    costoAlimentoPrecebos += fase.dias * fase.consumo * (fase.precio + fleteKg);
-  }
+  // Mano de obra
+  const costo_op_anio   = adm.salario_minimo * 12 * (1 + adm.cargas) + adm.dotacion;
+  const ops_cria        = Math.ceil(h / adm.cerdas_gest_x_op) + Math.ceil(h * 0.15 / adm.cerdas_par_x_op);
+  const ops_dest        = Math.ceil((total_dest + traslados) / 2 / adm.cerdos_dest_x_op);
+  const mo_cria_xc      = (ops_cria * costo_op_anio) / (cerdos_vend || 1);
+  const mo_dest_xc      = (ops_dest * costo_op_anio) / (cerdos_vend || 1);
 
-  // COSTOS DE ALIMENTO — CEBA (por cerdo)
-  let costoAlimentoCeba = 0;
-  for (const fase of dietas.ceba) {
-    costoAlimentoCeba += fase.dias * fase.consumo * (fase.precio + fleteKg);
-  }
+  // Mantenimiento
+  const mant_cria_xc  = (adm.infra_hembra * h * adm.pct_mant_cria) / (cerdos_vend || 1);
+  const mant_prec_xc  = adm.infra_prec * adm.pct_mant_prec;
+  const mant_ceba_xc  = adm.infra_ceba * adm.pct_mant_ceba;
 
-  // COSTO ALIMENTO POR CERDO VENDIDO (cría proporcional)
-  const costoAlimentoCriaXCerdo = (costoAlimentoMadres * h) / (cerdosVendidos || 1);
+  // Administración
+  const base_costos   = (costo_cria_xc + costo_prec_xc + costo_ceba_xc + mo_cria_xc + mo_dest_xc) * (cerdos_vend||1);
+  const admon_xc      = (base_costos * adm.pct_admon * 0.01 * 1.6) / (cerdos_vend || 1);
 
-  // SEMEN
-  const totalServicios = (totalDestetos / desTosParto * (1 / fertilidad));
-  const botellasXParto = (totalServicios * semen.botellas_por_servicio) / (totalDestetos / desTosParto || 1);
-  const costoSemenHembra = botellasXParto * semen.precio_botella * partosPorHembra;
-  const costoSemenXCerdo = (costoSemenHembra * h) / (cerdosVendidos || 1);
+  const costo_total_xc = costo_cria_xc + costo_prec_xc + costo_ceba_xc + flete_xc_total +
+                         costo_sem_xc + costo_gen_xc + san_xc +
+                         mo_cria_xc + mo_dest_xc +
+                         mant_cria_xc + mant_prec_xc + mant_ceba_xc + admon_xc;
 
-  // GENÉTICA (costo diferido por cerdo)
-  const costoPrimXHembra = ((genetica.costo_primeriza - genetica.costo_primeriza * genetica.descarte_primer_anio * genetica.pct_precio_descarte) / genetica.partos_diferir) * genetica.tasa_reemplazo;
-  const costoGeneticaXCerdo = (costoPrimXHembra * h) / (cerdosVendidos || 1);
+  const precio_xc    = pk * params.peso_venta;
+  const util_xc      = precio_xc - costo_total_xc;
+  const util_total   = util_xc * cerdos_vend;
+  const costo_xkilo  = costo_total_xc / (params.peso_venta || 1);
 
-  // PLAN SANITARIO
-  let costoSanitarioMadre = 0;
-  let costoSanitarioPrecebo = 0;
-  let costoSanitarioCeba = 0;
-  if (sanitario.modo === 'simple') {
-    const s = sanitario.simple;
-    const pctBio = 1 + (s.pct_bioseguridad || 0.2);
-    costoSanitarioMadre = ((s.primeriza + s.gestacion + s.lactancia) * pctBio * genetica.tasa_reemplazo);
-    costoSanitarioPrecebo = s.precebos * pctBio;
-    costoSanitarioCeba = s.ceba * pctBio;
-  }
-  const costoSanitarioXCerdo = (costoSanitarioMadre * h / (cerdosVendidos || 1)) +
-    costoSanitarioPrecebo + costoSanitarioCeba;
-
-  // MANO DE OBRA
-  const costoOperarioAnio = admin.salario_minimo * 12 * (1 + admin.cargas);
-  const operariosCria = Math.ceil(h / admin.cerdas_gestacion_x_operario) + Math.ceil(h * 0.15 / admin.cerdas_paridas_x_operario);
-  const operariosDestete = Math.ceil((totalDestetos + traslados) / 2 / admin.cerdos_destete_x_operario);
-  const costoMOCriaXCerdo = (operariosCria * costoOperarioAnio) / (cerdosVendidos || 1);
-  const costoMODestetXCerdo = (operariosDestete * costoOperarioAnio) / (cerdosVendidos || 1);
-
-  // MANTENIMIENTO
-  const costoMantCriaXCerdo = (admin.infra_hembra * h * admin.pct_mant_cria) / (cerdosVendidos || 1);
-  const costoMantPreceboXCerdo = admin.infra_precebo * admin.pct_mant_precebo;
-  const costoMantCebaXCerdo = admin.infra_ceba * admin.pct_mant_ceba;
-
-  // ADMINISTRACIÓN
-  const costoTotalOperativo = (costoAlimentoCriaXCerdo + costoAlimentoPrecebos + costoAlimentoCeba + costoMOCriaXCerdo + costoMODestetXCerdo) * cerdosVendidos;
-  const costoAdmonXCerdo = (costoTotalOperativo * admin.pct_admon * 0.01 * 1.6) / (cerdosVendidos || 1);
-
-  // COSTO TOTAL POR CERDO
-  const costoTotalXCerdo = costoAlimentoCriaXCerdo + costoAlimentoPrecebos + costoAlimentoCeba +
-    costoSemenXCerdo + costoGeneticaXCerdo + costoSanitarioXCerdo +
-    costoMOCriaXCerdo + costoMODestetXCerdo +
-    costoMantCriaXCerdo + costoMantPreceboXCerdo + costoMantCebaXCerdo +
-    costoAdmonXCerdo;
-
-  const precioXCerdo = precioKilo * pesoVenta;
-  const utilidadXCerdo = precioXCerdo - costoTotalXCerdo;
-  const utilidadTotal = utilidadXCerdo * cerdosVendidos;
-  const costoXKilo = costoTotalXCerdo / (pesoVenta || 1);
-
-  return {
-    cerdosVendidos, totalDestetos, kilosVendidos, ingresos,
-    costoTotalXCerdo, costoXKilo, precioXCerdo,
-    utilidadXCerdo, utilidadTotal,
-    partosPorHembra, destHembraAnio,
-    costoAlimentoCriaXCerdo, costoAlimentoPrecebos, costoAlimentoCeba,
-    costoSemenXCerdo, costoGeneticaXCerdo, costoSanitarioXCerdo,
-    costoMOCriaXCerdo, costoMODestetXCerdo,
-    costoMantCriaXCerdo, costoMantPreceboXCerdo, costoMantCebaXCerdo,
-    costoAdmonXCerdo,
-  };
+  return { cerdos_vend, total_dest, kilos_vend, costo_total_xc, costo_xkilo,
+           util_xc, util_total, precio_xc,
+           costo_cria_xc, costo_prec_xc, costo_ceba_xc, flete_xc_total,
+           costo_sem_xc, costo_gen_xc, san_xc,
+           mo_cria_xc, mo_dest_xc, mant_cria_xc, mant_prec_xc, mant_ceba_xc, admon_xc };
 }
 
-function calcularSensibilidad() {
-  const base = calcularGranja(state.params.actual, state.granja, state.genetica,
-    state.semen, state.dietas, state.sanitario, state.admin);
+function sensibilidad() {
+  const base = calc(state.params.actual, state.granja, state.genetica, state.semen, state.dietas, state.sanitario, state.admin);
+  const res = PARAMS.map(m => {
+    const p2 = {...state.params.actual, [m.key]: state.params.historico[m.key]};
+    const mod = calc(p2, state.granja, state.genetica, state.semen, state.dietas, state.sanitario, state.admin);
+    return {...m, dif: mod.util_total - base.util_total,
+            actual: state.params.actual[m.key], hist: state.params.historico[m.key]};
+  }).filter(r => Math.abs(r.dif) > 0).sort((a,b) => Math.abs(b.dif)-Math.abs(a.dif));
 
-  const resultados = [];
-  for (const meta of PARAM_META) {
-    const paramsModif = { ...state.params.actual };
-    paramsModif[meta.key] = state.params.historico[meta.key];
-    const modificado = calcularGranja(paramsModif, state.granja, state.genetica,
-      state.semen, state.dietas, state.sanitario, state.admin);
-    const difAnio = modificado.utilidadTotal - base.utilidadTotal;
-    if (Math.abs(difAnio) > 0) {
-      resultados.push({
-        ...meta,
-        difAnio,
-        actual: state.params.actual[meta.key],
-        historico: state.params.historico[meta.key],
-        utilBase: base.utilidadTotal,
-        utilModif: modificado.utilidadTotal,
-      });
-    }
-  }
-  resultados.sort((a, b) => Math.abs(b.difAnio) - Math.abs(a.difAnio));
-
-  // Total real (todos cambian juntos)
-  const totalReal = calcularGranja(state.params.historico, state.granja, state.genetica,
-    state.semen, state.dietas, state.sanitario, state.admin);
-  const difTotal = totalReal.utilidadTotal - base.utilidadTotal;
-
-  return { base, resultados, difTotal, totalReal };
+  const total = calc(state.params.historico, state.granja, state.genetica, state.semen, state.dietas, state.sanitario, state.admin);
+  return { base, res, difTotal: total.util_total - base.util_total, total };
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // FORMATTERS
-// ═══════════════════════════════════════════════════════
-function fmt(num, moneda = state.granja.moneda) {
-  const m = MONEDAS[moneda] || MONEDAS.COP;
-  const rounded = Math.round(num / (m.decimales === 0 ? 1000 : 1)) * (m.decimales === 0 ? 1000 : 1);
-  if (Math.abs(rounded) >= 1e9) return m.simbolo + (rounded / 1e9).toFixed(1) + 'B';
-  if (Math.abs(rounded) >= 1e6) return m.simbolo + (rounded / 1e6).toFixed(1) + 'M';
-  if (Math.abs(rounded) >= 1e3) return m.simbolo + (rounded / 1e3).toFixed(0) + 'K';
-  return m.simbolo + rounded.toFixed(m.decimales);
+// ══════════════════════════════════════════════════════════
+function fmt(n, mon) {
+  const m = MONEDAS[mon || state.granja.moneda] || MONEDAS.COP;
+  const a = Math.abs(n), s = n < 0 ? '-' : '';
+  if (a >= 1e9) return s + m.s + (a/1e9).toFixed(1) + 'B';
+  if (a >= 1e6) return s + m.s + (a/1e6).toFixed(1) + 'M';
+  if (a >= 1e3) return s + m.s + (a/1e3).toFixed(0) + 'K';
+  return s + m.s + a.toFixed(m.d);
 }
-
-function fmtFull(num, moneda = state.granja.moneda) {
-  const m = MONEDAS[moneda] || MONEDAS.COP;
-  return m.simbolo + Math.round(num).toLocaleString('es-CO');
+function fmtFull(n) {
+  const m = MONEDAS[state.granja.moneda] || MONEDAS.COP;
+  return m.s + Math.round(n).toLocaleString('es-CO');
 }
-
-function fmtUSD(num) {
+function fmtUSD(n) {
   const trm = parseFloat(state.granja.trm) || 4200;
-  const usd = num / trm;
-  if (Math.abs(usd) >= 1e6) return 'US$' + (usd / 1e6).toFixed(2) + 'M';
-  if (Math.abs(usd) >= 1e3) return 'US$' + (usd / 1e3).toFixed(1) + 'K';
-  return 'US$' + usd.toFixed(0);
+  const u = n / trm;
+  if (Math.abs(u) >= 1e6) return 'US$' + (u/1e6).toFixed(2) + 'M';
+  if (Math.abs(u) >= 1e3) return 'US$' + (u/1e3).toFixed(1) + 'K';
+  return 'US$' + u.toFixed(0);
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // NAVIGATION
-// ═══════════════════════════════════════════════════════
-const PAGE_META = {
-  granja:     { title: 'Mi Granja', sub: 'Paso 1 de 6 — Configura tu granja', step: 1 },
-  genetica:   { title: 'Genética & Semen', sub: 'Paso 2 de 6 — Configura tu material genético', step: 2 },
-  dietas:     { title: 'Dietas', sub: 'Paso 3 de 6 — Define tus fases de alimentación', step: 3 },
-  sanitario:  { title: 'Plan Sanitario', sub: 'Paso 4 de 6 — Costos sanitarios por etapa', step: 4 },
-  parametros: { title: 'Parámetros Productivos', sub: 'Paso 5 de 6 — Actual vs mejor histórico', step: 5 },
-  resultados: { title: 'Resultados del Diagnóstico', sub: 'Paso 6 de 6 — Tu análisis de pérdidas', step: 6 },
+// ══════════════════════════════════════════════════════════
+const META = {
+  granja:     {title:'Mi Granja',        sub:'Paso 1 de 6'},
+  genetica:   {title:'Genética & Semen', sub:'Paso 2 de 6'},
+  dietas:     {title:'Dietas',           sub:'Paso 3 de 6'},
+  sanitario:  {title:'Plan Sanitario',   sub:'Paso 4 de 6'},
+  parametros: {title:'Parámetros',       sub:'Paso 5 de 6'},
+  resultados: {title:'Resultados',       sub:'Diagnóstico completo'},
 };
 
-function goTo(page) {
-  state.currentPage = page;
+function goTo(p) {
+  state.page = p;
+  // sidebar
   document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('nav-' + page)?.classList.add('active');
-  const meta = PAGE_META[page];
-  document.getElementById('topbar-title').textContent = meta.title;
-  document.getElementById('topbar-sub').textContent = meta.sub;
-  renderPage(page);
+  document.getElementById('nav-'+p)?.classList.add('active');
+  // bottom nav
+  document.querySelectorAll('.bn-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('bn-'+p)?.classList.add('active');
+  // topbar
+  const m = META[p];
+  document.getElementById('topbar-title').textContent = m.title;
+  document.getElementById('topbar-sub').textContent = m.sub;
+  // render
+  const renders = {granja:renderGranja, genetica:renderGenetica, dietas:renderDietas,
+                   sanitario:renderSanitario, parametros:renderParametros, resultados:renderResultados};
+  document.getElementById('content').innerHTML = renders[p]?.() || '';
+  postRender(p);
   updateProgress();
   closeSidebar();
-  window.scrollTo(0, 0);
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function updateProgress() {
-  const total = 6;
-  const done = state.completedSteps.size;
-  const pct = Math.round((done / total) * 100);
+  const done = state.done.size, total = 6;
+  const pct = Math.round(done/total*100);
   document.getElementById('prog-pct').textContent = pct + '%';
   document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('topbar-badge').textContent = done === total ? 'Completo ✓' : 'En progreso';
-  document.getElementById('topbar-badge').className = 'badge ' + (done === total ? 'badge-verde' : 'badge-oro');
+  document.getElementById('topbar-badge').textContent = done === total ? '✓ Completo' : 'En progreso';
+  document.getElementById('topbar-badge').className = 'badge ' + (done===total ? 'badge-vg' : 'badge-oro');
+  // mark done in sidebar
+  const steps = ['granja','genetica','dietas','sanitario','parametros','resultados'];
+  steps.forEach(s => {
+    const el = document.getElementById('nav-'+s);
+    const nb = document.getElementById('sbn-'+s);
+    if (state.done.has(s)) {
+      el?.classList.add('done');
+      if (nb) nb.textContent = '✓';
+    }
+  });
 }
 
 function toggleSidebar() {
@@ -679,551 +754,476 @@ function closeSidebar() {
   document.getElementById('overlay').classList.remove('show');
 }
 
-// ═══════════════════════════════════════════════════════
-// PAGES
-// ═══════════════════════════════════════════════════════
-function renderPage(page) {
-  const el = document.getElementById('content');
-  const renders = { granja: renderGranja, genetica: renderGenetica, dietas: renderDietas,
-    sanitario: renderSanitario, parametros: renderParametros, resultados: renderResultados };
-  el.innerHTML = renders[page]?.() || '';
-  bindPage(page);
+function postRender(p) {
+  if (p === 'dietas') renderFases();
+  if (p === 'sanitario') bindSanToggle();
 }
 
-// ─── PAGE 1: GRANJA ───
+// ══════════════════════════════════════════════════════════
+// PAGE 1: GRANJA
+// ══════════════════════════════════════════════════════════
 function renderGranja() {
+  const g = state.granja;
   return `
-  <div class="section-card">
-    <div class="section-card-title">Información de la Granja</div>
-    <div class="section-card-sub">Datos básicos y variables económicas de tu operación</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Nombre de la granja</label>
-        <input class="form-input" id="g-nombre" type="text" placeholder="Ej: Granja El Paso" value="${state.granja.nombre}">
+  <div class="card">
+    <div class="card-title">Información de la Granja</div>
+    <div class="card-sub">Datos básicos y variables económicas de tu operación</div>
+    <div class="fg fg-auto">
+      <div class="fgroup">
+        <label class="flabel">Nombre de la granja</label>
+        <input class="finput" id="g-nom" type="text" placeholder="Ej: Granja El Paso" value="${g.nombre}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Hembras activas <span>(total en producción)</span></label>
-        <input class="form-input" id="g-hembras" type="number" placeholder="Ej: 168" value="${state.granja.hembras}">
+      <div class="fgroup">
+        <label class="flabel">Hembras activas</label>
+        <input class="finput" id="g-hem" type="number" inputmode="numeric" placeholder="Ej: 168" value="${g.hembras}">
       </div>
-      <div class="form-group">
-        <label class="form-label">País</label>
-        <select class="form-select" id="g-pais">
-          <option value="CO" ${state.granja.pais==='CO'?'selected':''}>🇨🇴 Colombia</option>
-          <option value="MX" ${state.granja.pais==='MX'?'selected':''}>🇲🇽 México</option>
-          <option value="BR" ${state.granja.pais==='BR'?'selected':''}>🇧🇷 Brasil</option>
-          <option value="AR" ${state.granja.pais==='AR'?'selected':''}>🇦🇷 Argentina</option>
-          <option value="CL" ${state.granja.pais==='CL'?'selected':''}>🇨🇱 Chile</option>
-          <option value="PE" ${state.granja.pais==='PE'?'selected':''}>🇵🇪 Perú</option>
-          <option value="US" ${state.granja.pais==='US'?'selected':''}>🇺🇸 Estados Unidos</option>
-          <option value="EU" ${state.granja.pais==='EU'?'selected':''}>🇪🇺 Europa</option>
+      <div class="fgroup">
+        <label class="flabel">País</label>
+        <select class="fselect" id="g-pais">
+          <option value="CO" ${g.pais==='CO'?'selected':''}>🇨🇴 Colombia</option>
+          <option value="MX" ${g.pais==='MX'?'selected':''}>🇲🇽 México</option>
+          <option value="BR" ${g.pais==='BR'?'selected':''}>🇧🇷 Brasil</option>
+          <option value="AR" ${g.pais==='AR'?'selected':''}>🇦🇷 Argentina</option>
+          <option value="CL" ${g.pais==='CL'?'selected':''}>🇨🇱 Chile</option>
+          <option value="PE" ${g.pais==='PE'?'selected':''}>🇵🇪 Perú</option>
+          <option value="US" ${g.pais==='US'?'selected':''}>🇺🇸 Estados Unidos</option>
+          <option value="EU" ${g.pais==='EU'?'selected':''}>🇪🇺 Europa</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Moneda local</label>
-        <select class="form-select" id="g-moneda">
-          ${Object.entries(MONEDAS).map(([k,v])=>`<option value="${k}" ${state.granja.moneda===k?'selected':''}>${v.simbolo} ${v.nombre}</option>`).join('')}
+      <div class="fgroup">
+        <label class="flabel">Moneda</label>
+        <select class="fselect" id="g-mon">
+          ${Object.entries(MONEDAS).map(([k,v])=>`<option value="${k}" ${g.moneda===k?'selected':''}>${v.s} ${v.n}</option>`).join('')}
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">TRM <span>(vs Dólar USD)</span></label>
-        <input class="form-input" id="g-trm" type="number" placeholder="Ej: 4200" value="${state.granja.trm}">
+      <div class="fgroup">
+        <label class="flabel">TRM <em>(vs USD)</em></label>
+        <input class="finput" id="g-trm" type="number" inputmode="decimal" value="${g.trm}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Precio venta por kg <span>(cerdo gordo)</span></label>
-        <input class="form-input" id="g-precio" type="number" placeholder="Ej: 9200" value="${state.granja.precio_kilo}">
+      <div class="fgroup">
+        <label class="flabel">Precio venta / kg <em>(cerdo gordo)</em></label>
+        <input class="finput" id="g-pk" type="number" inputmode="numeric" value="${g.precio_kilo}">
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-primary" onclick="saveGranja()">Guardar y continuar →</button>
+      <button class="btn btn-primary" onclick="saveGranja()">Guardar y continuar →</button>
     </div>
   </div>`;
 }
 
-function bindPage(page) {
-  if (page === 'dietas') renderDietasPhase();
-  if (page === 'sanitario') bindSanitario();
-}
-
 function saveGranja() {
-  state.granja.nombre = document.getElementById('g-nombre').value;
-  state.granja.hembras = document.getElementById('g-hembras').value;
-  state.granja.pais = document.getElementById('g-pais').value;
-  state.granja.moneda = document.getElementById('g-moneda').value;
-  state.granja.trm = parseFloat(document.getElementById('g-trm').value) || 4200;
-  state.granja.precio_kilo = parseFloat(document.getElementById('g-precio').value) || 9200;
+  state.granja.nombre      = document.getElementById('g-nom').value;
+  state.granja.hembras     = document.getElementById('g-hem').value;
+  state.granja.pais        = document.getElementById('g-pais').value;
+  state.granja.moneda      = document.getElementById('g-mon').value;
+  state.granja.trm         = parseFloat(document.getElementById('g-trm').value) || 4200;
+  state.granja.precio_kilo = parseFloat(document.getElementById('g-pk').value) || 9200;
   document.getElementById('sb-farm-name').textContent = state.granja.nombre || 'Sin nombre';
-  document.getElementById('sb-farm-sub').textContent = (state.granja.hembras || '?') + ' hembras · ' + (state.granja.moneda || 'COP');
-  state.completedSteps.add('granja');
+  document.getElementById('sb-farm-sub').textContent = (state.granja.hembras||'?') + ' hembras · ' + state.granja.moneda;
+  state.done.add('granja');
   updateProgress();
   goTo('genetica');
 }
 
-// ─── PAGE 2: GENÉTICA ───
+// ══════════════════════════════════════════════════════════
+// PAGE 2: GENÉTICA
+// ══════════════════════════════════════════════════════════
 function renderGenetica() {
-  const g = state.genetica; const s = state.semen;
+  const g = state.genetica, s = state.semen;
   return `
-  <div class="section-card">
-    <div class="section-card-title">Genética de Hembras</div>
-    <div class="section-card-sub">Costos y parámetros de reposición de tu pie de cría</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Costo hembra primeriza</label>
-        <input class="form-input" id="gen-costo" type="number" value="${g.costo_primeriza}">
+  <div class="card">
+    <div class="card-title">Genética de Hembras</div>
+    <div class="card-sub">Costos y parámetros de reposición de tu pie de cría</div>
+    <div class="fg fg-auto">
+      <div class="fgroup">
+        <label class="flabel">Costo hembra primeriza</label>
+        <input class="finput" id="gen-cos" type="number" inputmode="numeric" value="${g.costo_primeriza}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Edad de compra <span>(días)</span></label>
-        <input class="form-input" id="gen-edad-compra" type="number" value="${g.edad_compra}">
+      <div class="fgroup">
+        <label class="flabel">Edad de compra <em>(días)</em></label>
+        <input class="finput" id="gen-ec" type="number" inputmode="numeric" value="${g.edad_compra}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Edad a la monta <span>(días)</span></label>
-        <input class="form-input" id="gen-edad-monta" type="number" value="${g.edad_monta}">
+      <div class="fgroup">
+        <label class="flabel">Edad a la monta <em>(días)</em></label>
+        <input class="finput" id="gen-em" type="number" inputmode="numeric" value="${g.edad_monta}">
       </div>
-      <div class="form-group">
-        <label class="form-label">% Descarte primer año</label>
-        <input class="form-input" id="gen-descarte" type="number" step="0.01" value="${g.descarte_primer_anio}">
+      <div class="fgroup">
+        <label class="flabel">% Descarte primer año</label>
+        <input class="finput" id="gen-desc" type="number" inputmode="decimal" step="0.01" value="${g.descarte_primer_anio}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Partos para diferir costo genético</label>
-        <input class="form-input" id="gen-partos-diferir" type="number" value="${g.partos_diferir}">
+      <div class="fgroup">
+        <label class="flabel">Partos para diferir costo</label>
+        <input class="finput" id="gen-pd" type="number" inputmode="numeric" value="${g.partos_diferir}">
       </div>
-      <div class="form-group">
-        <label class="form-label">% Precio descarte / valor gordo</label>
-        <input class="form-input" id="gen-pct-descarte" type="number" step="0.01" value="${g.pct_precio_descarte}">
+      <div class="fgroup">
+        <label class="flabel">% Precio descarte / gordo</label>
+        <input class="finput" id="gen-pcd" type="number" inputmode="decimal" step="0.01" value="${g.pct_precio_descarte}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Tasa de reemplazo anual <span>(%)</span></label>
-        <input class="form-input" id="gen-reemplazo" type="number" step="0.01" value="${g.tasa_reemplazo}">
+      <div class="fgroup">
+        <label class="flabel">Tasa de reemplazo <em>(%)</em></label>
+        <input class="finput" id="gen-tr" type="number" inputmode="decimal" step="0.01" value="${g.tasa_reemplazo}">
       </div>
     </div>
   </div>
-  <div class="section-card">
-    <div class="section-card-title">Semen</div>
-    <div class="section-card-sub">Costos de inseminación artificial de tu granja</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Botellas / dosis por servicio</label>
-        <input class="form-input" id="sem-botellas" type="number" step="0.5" value="${s.botellas_por_servicio}">
+  <div class="card">
+    <div class="card-title">Semen</div>
+    <div class="card-sub">Costos de inseminación de tu granja</div>
+    <div class="fg fg-2">
+      <div class="fgroup">
+        <label class="flabel">Botellas / dosis por servicio</label>
+        <input class="finput" id="sem-bot" type="number" inputmode="decimal" step="0.5" value="${s.botellas_por_servicio}">
       </div>
-      <div class="form-group">
-        <label class="form-label">Precio por botella / dosis</label>
-        <input class="form-input" id="sem-precio" type="number" value="${s.precio_botella}">
+      <div class="fgroup">
+        <label class="flabel">Precio por botella / dosis</label>
+        <input class="finput" id="sem-pre" type="number" inputmode="numeric" value="${s.precio_botella}">
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo('granja')">← Atrás</button>
-      <button class="btn-primary" onclick="saveGenetica()">Guardar y continuar →</button>
+      <button class="btn btn-secondary" onclick="goTo('granja')">← Atrás</button>
+      <button class="btn btn-primary" onclick="saveGenetica()">Guardar →</button>
     </div>
   </div>`;
 }
 
 function saveGenetica() {
-  state.genetica.costo_primeriza = parseFloat(document.getElementById('gen-costo').value) || 1400000;
-  state.genetica.edad_compra = parseFloat(document.getElementById('gen-edad-compra').value) || 120;
-  state.genetica.edad_monta = parseFloat(document.getElementById('gen-edad-monta').value) || 230;
-  state.genetica.descarte_primer_anio = parseFloat(document.getElementById('gen-descarte').value) || 0.1;
-  state.genetica.partos_diferir = parseFloat(document.getElementById('gen-partos-diferir').value) || 6;
-  state.genetica.pct_precio_descarte = parseFloat(document.getElementById('gen-pct-descarte').value) || 0.6;
-  state.genetica.tasa_reemplazo = parseFloat(document.getElementById('gen-reemplazo').value) || 0.415;
-  state.semen.botellas_por_servicio = parseFloat(document.getElementById('sem-botellas').value) || 2.5;
-  state.semen.precio_botella = parseFloat(document.getElementById('sem-precio').value) || 20000;
-  state.completedSteps.add('genetica');
+  const g = state.genetica;
+  g.costo_primeriza     = parseFloat(document.getElementById('gen-cos').value) || 1400000;
+  g.edad_compra         = parseFloat(document.getElementById('gen-ec').value)  || 120;
+  g.edad_monta          = parseFloat(document.getElementById('gen-em').value)  || 230;
+  g.descarte_primer_anio= parseFloat(document.getElementById('gen-desc').value)|| 0.1;
+  g.partos_diferir      = parseFloat(document.getElementById('gen-pd').value)  || 6;
+  g.pct_precio_descarte = parseFloat(document.getElementById('gen-pcd').value) || 0.6;
+  g.tasa_reemplazo      = parseFloat(document.getElementById('gen-tr').value)  || 0.415;
+  state.semen.botellas_por_servicio = parseFloat(document.getElementById('sem-bot').value) || 2.5;
+  state.semen.precio_botella        = parseFloat(document.getElementById('sem-pre').value) || 20000;
+  state.done.add('genetica');
   updateProgress();
   goTo('dietas');
 }
 
-// ─── PAGE 3: DIETAS ───
+// ══════════════════════════════════════════════════════════
+// PAGE 3: DIETAS
+// ══════════════════════════════════════════════════════════
 function renderDietas() {
   return `
-  <div class="section-card">
-    <div class="section-card-title">Dietas — Madres</div>
-    <div class="section-card-sub">Ciclo reproductivo: gestación, lactancia y flushing. Agrega o elimina fases según tu programa.</div>
+  <div class="card">
+    <div class="card-title">🐷 Dietas — Madres</div>
+    <div class="card-sub">Ciclo reproductivo. Agrega o elimina fases según tu programa.</div>
     <div id="fases-madres"></div>
-    <button class="btn-add-fase" onclick="addFase('madres')">+ Agregar fase</button>
+    <button class="btn-add" onclick="addFase('madres')">＋ Agregar fase</button>
   </div>
-  <div class="section-card">
-    <div class="section-card-title">Dietas — Precebos / Jaulones</div>
-    <div class="section-card-sub">Desde destete hasta traslado a ceba.</div>
+  <div class="card">
+    <div class="card-title">🐣 Dietas — Precebos / Jaulones</div>
+    <div class="card-sub">Desde destete hasta traslado a ceba.</div>
     <div id="fases-precebos"></div>
-    <button class="btn-add-fase" onclick="addFase('precebos')">+ Agregar fase</button>
+    <button class="btn-add" onclick="addFase('precebos')">＋ Agregar fase</button>
   </div>
-  <div class="section-card">
-    <div class="section-card-title">Dietas — Ceba / Engorde</div>
-    <div class="section-card-sub">Desde traslado hasta peso de venta.</div>
+  <div class="card">
+    <div class="card-title">🐗 Dietas — Ceba / Engorde</div>
+    <div class="card-sub">Desde traslado hasta peso de venta.</div>
     <div id="fases-ceba"></div>
-    <button class="btn-add-fase" onclick="addFase('ceba')">+ Agregar fase</button>
+    <button class="btn-add" onclick="addFase('ceba')">＋ Agregar fase</button>
   </div>
-  <div class="section-card">
-    <div class="section-card-title">Flete de alimento</div>
-    <div class="section-card-sub">Costo de transporte por kilo de alimento entregado en granja.</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Costo flete por kg <span>(aplica a todas las dietas)</span></label>
-        <input class="form-input" id="flete-kg" type="number" step="1" value="${state.dietas.flete}">
-      </div>
+  <div class="card">
+    <div class="card-title">🚛 Flete de alimento</div>
+    <div class="card-sub">Costo de transporte por kilo, aplica a todas las dietas.</div>
+    <div class="fgroup">
+      <label class="flabel">Costo flete por kg</label>
+      <input class="finput" id="flete" type="number" inputmode="decimal" value="${state.dietas.flete}">
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo('genetica')">← Atrás</button>
-      <button class="btn-primary" onclick="saveDietas()">Guardar y continuar →</button>
+      <button class="btn btn-secondary" onclick="goTo('genetica')">← Atrás</button>
+      <button class="btn btn-primary" onclick="saveDietas()">Guardar →</button>
     </div>
   </div>`;
 }
 
-function renderDietasPhase() {
-  ['madres', 'precebos', 'ceba'].forEach(tipo => {
-    const cont = document.getElementById('fases-' + tipo);
+function renderFases() {
+  ['madres','precebos','ceba'].forEach(t => {
+    const cont = document.getElementById('fases-'+t);
     if (!cont) return;
-    cont.innerHTML = state.dietas[tipo].map((fase, i) => `
-      <div class="dieta-fase">
-        <div class="dieta-fase-header">
-          <input class="form-input" style="max-width:220px" type="text" value="${fase.nombre}" onchange="updateFase('${tipo}',${i},'nombre',this.value)" placeholder="Nombre de la fase">
-          <button class="btn-del" onclick="delFase('${tipo}',${i})" title="Eliminar fase">✕</button>
+    const flete = parseFloat(document.getElementById('flete')?.value) || state.dietas.flete;
+    cont.innerHTML = state.dietas[t].map((f,i) => `
+      <div class="fase">
+        <div class="fase-header">
+          <input class="fase-name-input" type="text" value="${f.nombre}" placeholder="Nombre" onchange="updFase('${t}',${i},'nombre',this.value)">
+          <button class="btn-del" onclick="delFase('${t}',${i})" title="Eliminar">✕</button>
         </div>
-        <div class="dieta-fase-grid">
-          <div class="form-group">
-            <label class="form-label">Días</label>
-            <input class="form-input" type="number" step="0.5" value="${fase.dias}" onchange="updateFase('${tipo}',${i},'dias',this.value)">
+        <div class="fase-grid">
+          <div class="fgroup">
+            <label class="flabel">Días</label>
+            <input class="finput" type="number" inputmode="decimal" step="0.5" value="${f.dias}" onchange="updFase('${t}',${i},'dias',this.value)" style="padding:10px 10px;font-size:14px">
           </div>
-          <div class="form-group">
-            <label class="form-label">Consumo/día <span>(kg)</span></label>
-            <input class="form-input" type="number" step="0.01" value="${fase.consumo}" onchange="updateFase('${tipo}',${i},'consumo',this.value)">
+          <div class="fgroup">
+            <label class="flabel">Cons./día kg</label>
+            <input class="finput" type="number" inputmode="decimal" step="0.01" value="${f.consumo}" onchange="updFase('${t}',${i},'consumo',this.value)" style="padding:10px 10px;font-size:14px">
           </div>
-          <div class="form-group">
-            <label class="form-label">Precio/kg <span>(sin flete)</span></label>
-            <input class="form-input" type="number" step="1" value="${fase.precio}" onchange="updateFase('${tipo}',${i},'precio',this.value)">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Costo total fase</label>
-            <div class="form-input" style="color:var(--oro-light);font-weight:600">${fmtFull(fase.dias * fase.consumo * (fase.precio + (parseFloat(document.getElementById('flete-kg')?.value) || state.dietas.flete)))}</div>
+          <div class="fgroup">
+            <label class="flabel">Precio/kg</label>
+            <input class="finput" type="number" inputmode="numeric" value="${f.precio}" onchange="updFase('${t}',${i},'precio',this.value)" style="padding:10px 10px;font-size:14px">
           </div>
         </div>
+        <div class="fase-total">Total fase: <span>${fmtFull(f.dias*f.consumo*f.precio)}</span></div>
       </div>`).join('');
   });
 }
 
-function updateFase(tipo, idx, campo, val) {
-  state.dietas[tipo][idx][campo] = campo === 'nombre' ? val : parseFloat(val) || 0;
-  renderDietasPhase();
+function updFase(t, i, k, v) {
+  state.dietas[t][i][k] = k==='nombre' ? v : parseFloat(v)||0;
+  renderFases();
 }
-function addFase(tipo) {
-  state.dietas[tipo].push({ nombre: 'Nueva fase', dias: 28, consumo: 1.5, precio: 1800 });
-  renderDietasPhase();
+function addFase(t) {
+  state.dietas[t].push({nombre:'Nueva fase', dias:28, consumo:1.5, precio:1800});
+  renderFases();
 }
-function delFase(tipo, idx) {
-  if (state.dietas[tipo].length <= 1) return;
-  state.dietas[tipo].splice(idx, 1);
-  renderDietasPhase();
+function delFase(t, i) {
+  if (state.dietas[t].length <= 1) return;
+  state.dietas[t].splice(i, 1);
+  renderFases();
 }
 function saveDietas() {
-  state.dietas.flete = parseFloat(document.getElementById('flete-kg')?.value) || 40;
-  state.completedSteps.add('dietas');
+  state.dietas.flete = parseFloat(document.getElementById('flete')?.value) || 40;
+  state.done.add('dietas');
   updateProgress();
   goTo('sanitario');
 }
 
-// ─── PAGE 4: SANITARIO ───
+// ══════════════════════════════════════════════════════════
+// PAGE 4: SANITARIO
+// ══════════════════════════════════════════════════════════
 function renderSanitario() {
-  const modo = state.sanitario.modo;
-  const s = state.sanitario.simple;
   return `
-  <div class="section-card">
-    <div class="section-card-title">Plan Sanitario</div>
-    <div class="section-card-sub">Elige cómo quieres ingresar tus costos sanitarios</div>
-    <div class="toggle-mode">
-      <button class="toggle-btn ${modo==='simple'?'active':''}" onclick="setSanitarioModo('simple')">Modo simple</button>
-      <button class="toggle-btn ${modo==='detallado'?'active':''}" onclick="setSanitarioModo('detallado')">Modo detallado</button>
+  <div class="card">
+    <div class="card-title">Plan Sanitario</div>
+    <div class="card-sub">Elige cómo ingresar tus costos sanitarios</div>
+    <div class="toggle-mode" id="san-toggle">
+      <button class="toggle-btn ${state.sanitario.modo==='simple'?'active':''}" onclick="setSanModo('simple')">Modo simple</button>
+      <button class="toggle-btn ${state.sanitario.modo==='detallado'?'active':''}" onclick="setSanModo('detallado')">Detallado</button>
     </div>
-    <div id="sanitario-content">
-      ${modo === 'simple' ? renderSanitarioSimple() : renderSanitarioDetallado()}
+    <div id="san-content">
+      ${state.sanitario.modo==='simple' ? renderSanSimple() : renderSanDetallado()}
     </div>
     <div class="btn-row">
-      <button class="btn-secondary" onclick="goTo('dietas')">← Atrás</button>
-      <button class="btn-primary" onclick="saveSanitario()">Guardar y continuar →</button>
+      <button class="btn btn-secondary" onclick="goTo('dietas')">← Atrás</button>
+      <button class="btn btn-primary" onclick="saveSanitario()">Guardar →</button>
     </div>
   </div>`;
 }
 
-function renderSanitarioSimple() {
+function renderSanSimple() {
   const s = state.sanitario.simple;
   return `
-  <div class="alert-info">💡 Ingresa el costo total de tu plan sanitario por etapa, incluyendo todos los productos que uses.</div>
-  <div class="form-grid">
-    <div class="form-group">
-      <label class="form-label">Plan sanitario primeriza <span>(por animal)</span></label>
-      <input class="form-input" id="san-prim" type="number" value="${s.primeriza}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Plan sanitario gestación <span>(por ciclo)</span></label>
-      <input class="form-input" id="san-gest" type="number" value="${s.gestacion}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Plan sanitario lactancia <span>(por parto)</span></label>
-      <input class="form-input" id="san-lact" type="number" value="${s.lactancia}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Plan sanitario precebos <span>(por lechón)</span></label>
-      <input class="form-input" id="san-prec" type="number" value="${s.precebos}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Plan sanitario ceba <span>(por cerdo)</span></label>
-      <input class="form-input" id="san-ceba" type="number" value="${s.ceba}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">% Desinfectantes y bioseguridad <span>(sobre subtotal)</span></label>
-      <input class="form-input" id="san-bio" type="number" step="0.01" value="${s.pct_bioseguridad}">
-    </div>
+  <div class="alert alert-info">💡 Ingresa el costo total de tu programa sanitario por etapa, incluyendo todos los productos.</div>
+  <div class="fg fg-auto">
+    <div class="fgroup"><label class="flabel">Primeriza <em>(por animal)</em></label><input class="finput" id="ss-prim" type="number" inputmode="numeric" value="${s.primeriza}"></div>
+    <div class="fgroup"><label class="flabel">Gestación <em>(por ciclo)</em></label><input class="finput" id="ss-gest" type="number" inputmode="numeric" value="${s.gestacion}"></div>
+    <div class="fgroup"><label class="flabel">Lactancia <em>(por parto)</em></label><input class="finput" id="ss-lact" type="number" inputmode="numeric" value="${s.lactancia}"></div>
+    <div class="fgroup"><label class="flabel">Precebos <em>(por lechón)</em></label><input class="finput" id="ss-prec" type="number" inputmode="numeric" value="${s.precebos}"></div>
+    <div class="fgroup"><label class="flabel">Ceba <em>(por cerdo)</em></label><input class="finput" id="ss-ceba" type="number" inputmode="numeric" value="${s.ceba}"></div>
+    <div class="fgroup"><label class="flabel">% Desinfectantes y bioseguridad</label><input class="finput" id="ss-bio" type="number" inputmode="decimal" step="0.01" value="${s.pct_bioseguridad}"></div>
   </div>`;
 }
 
-function renderSanitarioDetallado() {
-  const etapas = ['remplazos', 'gestacion', 'lactancia', 'precebos', 'ceba'];
-  const nombres = { remplazos: 'Reemplazos/Primerizas', gestacion: 'Gestación', lactancia: 'Lactancia', precebos: 'Precebos', ceba: 'Ceba' };
-  return etapas.map(etapa => {
-    const items = state.sanitario.detallado[etapa];
-    const total = items.reduce((s, i) => s + (i.precio * i.cantidad), 0);
+function renderSanDetallado() {
+  const etapas = ['remplazos','gestacion','lactancia','precebos','ceba'];
+  const noms   = {remplazos:'Reemplazos',gestacion:'Gestación',lactancia:'Lactancia',precebos:'Precebos',ceba:'Ceba'};
+  return etapas.map(e => {
+    const items = state.sanitario.detallado[e];
+    const total = items.reduce((s,i) => s + i.precio * i.cantidad, 0) * 1.2;
     return `
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:14px;font-weight:600;color:var(--blanco)">${nombres[etapa]}</div>
-        <div style="font-size:13px;color:var(--oro-light);font-family:'Fraunces',serif;font-weight:700">Total: ${fmtFull(total * 1.2)}</div>
+        <div style="font-size:14px;font-weight:600;color:var(--bl)">${noms[e]}</div>
+        <div style="font-size:13px;color:var(--oro-l);font-family:'Fraunces',serif;font-weight:700">${fmtFull(total)}</div>
       </div>
-      <div id="san-det-${etapa}">
-        ${items.map((item, i) => `
-          <div style="display:grid;grid-template-columns:1fr 80px 90px 90px 36px;gap:8px;margin-bottom:6px;align-items:center">
-            <input class="form-input" style="font-size:12px" type="text" value="${item.nombre}" placeholder="Producto" onchange="updateSanItem('${etapa}',${i},'nombre',this.value)">
-            <input class="form-input" style="font-size:12px;text-align:center" type="text" value="${item.unidad}" placeholder="Unidad" onchange="updateSanItem('${etapa}',${i},'unidad',this.value)">
-            <input class="form-input" style="font-size:12px;text-align:center" type="number" value="${item.precio}" placeholder="Precio" onchange="updateSanItem('${etapa}',${i},'precio',this.value)">
-            <input class="form-input" style="font-size:12px;text-align:center" type="number" step="0.5" value="${item.cantidad}" placeholder="Cant." onchange="updateSanItem('${etapa}',${i},'cantidad',this.value)">
-            <button class="btn-del" onclick="delSanItem('${etapa}',${i})">✕</button>
-          </div>`).join('')}
-      </div>
-      <button class="btn-add-fase" onclick="addSanItem('${etapa}')">+ Agregar producto</button>
-      <div style="font-size:11px;color:var(--crema-d);margin-top:6px">+20% desinfectantes y bioseguridad incluido automáticamente</div>
-    </div>`;
-  }).join('<div class="divider"></div>');
+      ${items.map((item,i) => `
+        <div style="display:grid;grid-template-columns:1fr 70px 80px 70px 36px;gap:6px;margin-bottom:6px;align-items:center">
+          <input class="finput" style="font-size:13px;padding:9px 10px" type="text" value="${item.nombre}" placeholder="Producto" onchange="updSan('${e}',${i},'nombre',this.value)">
+          <input class="finput" style="font-size:12px;padding:9px 8px;text-align:center" type="text" value="${item.unidad}" placeholder="Un." onchange="updSan('${e}',${i},'unidad',this.value)">
+          <input class="finput" style="font-size:12px;padding:9px 8px;text-align:center" type="number" inputmode="numeric" value="${item.precio}" onchange="updSan('${e}',${i},'precio',this.value)">
+          <input class="finput" style="font-size:12px;padding:9px 8px;text-align:center" type="number" inputmode="decimal" step="0.5" value="${item.cantidad}" onchange="updSan('${e}',${i},'cantidad',this.value)">
+          <button class="btn-del" onclick="delSan('${e}',${i})">✕</button>
+        </div>`).join('')}
+      <button class="btn-add" onclick="addSan('${e}')">＋ Producto</button>
+      <div style="font-size:11px;color:var(--cd);margin-top:4px">+20% desinfectantes incluido automáticamente</div>
+    </div>
+    <div class="divider"></div>`;
+  }).join('');
 }
 
-function bindSanitario() {}
-function setSanitarioModo(modo) {
-  state.sanitario.modo = modo;
-  document.getElementById('sanitario-content').innerHTML = modo === 'simple' ? renderSanitarioSimple() : renderSanitarioDetallado();
-  document.querySelectorAll('.toggle-btn').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && modo === 'simple') || (i === 1 && modo === 'detallado'));
-  });
+function bindSanToggle() {}
+function setSanModo(m) {
+  state.sanitario.modo = m;
+  document.getElementById('san-content').innerHTML = m==='simple' ? renderSanSimple() : renderSanDetallado();
+  document.querySelectorAll('.toggle-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&m==='simple')||(i===1&&m==='detallado')));
 }
-function updateSanItem(etapa, idx, campo, val) {
-  state.sanitario.detallado[etapa][idx][campo] = campo === 'nombre' || campo === 'unidad' ? val : parseFloat(val) || 0;
-}
-function addSanItem(etapa) {
-  state.sanitario.detallado[etapa].push({ nombre: 'Nuevo producto', unidad: 'Dosis', precio: 0, cantidad: 1 });
-  setSanitarioModo('detallado');
-}
-function delSanItem(etapa, idx) {
-  state.sanitario.detallado[etapa].splice(idx, 1);
-  setSanitarioModo('detallado');
-}
+function updSan(e, i, k, v) { state.sanitario.detallado[e][i][k] = k==='nombre'||k==='unidad' ? v : parseFloat(v)||0; }
+function addSan(e) { state.sanitario.detallado[e].push({nombre:'Nuevo producto',unidad:'Dosis',precio:0,cantidad:1}); setSanModo('detallado'); }
+function delSan(e, i) { state.sanitario.detallado[e].splice(i,1); setSanModo('detallado'); }
 function saveSanitario() {
   if (state.sanitario.modo === 'simple') {
-    state.sanitario.simple.primeriza = parseFloat(document.getElementById('san-prim')?.value) || 0;
-    state.sanitario.simple.gestacion = parseFloat(document.getElementById('san-gest')?.value) || 0;
-    state.sanitario.simple.lactancia = parseFloat(document.getElementById('san-lact')?.value) || 0;
-    state.sanitario.simple.precebos = parseFloat(document.getElementById('san-prec')?.value) || 0;
-    state.sanitario.simple.ceba = parseFloat(document.getElementById('san-ceba')?.value) || 0;
-    state.sanitario.simple.pct_bioseguridad = parseFloat(document.getElementById('san-bio')?.value) || 0.2;
+    const s = state.sanitario.simple;
+    s.primeriza       = parseFloat(document.getElementById('ss-prim')?.value) || 0;
+    s.gestacion       = parseFloat(document.getElementById('ss-gest')?.value) || 0;
+    s.lactancia       = parseFloat(document.getElementById('ss-lact')?.value) || 0;
+    s.precebos        = parseFloat(document.getElementById('ss-prec')?.value) || 0;
+    s.ceba            = parseFloat(document.getElementById('ss-ceba')?.value) || 0;
+    s.pct_bioseguridad= parseFloat(document.getElementById('ss-bio')?.value)  || 0.2;
   }
-  state.completedSteps.add('sanitario');
+  state.done.add('sanitario');
   updateProgress();
   goTo('parametros');
 }
 
-// ─── PAGE 5: PARÁMETROS ───
+// ══════════════════════════════════════════════════════════
+// PAGE 5: PARÁMETROS
+// ══════════════════════════════════════════════════════════
 function renderParametros() {
-  const a = state.params.actual; const h = state.params.historico;
-  const rows = PARAM_META.map(meta => {
-    const va = a[meta.key]; const vh = h[meta.key];
+  const a = state.params.actual, h = state.params.historico;
+  const cards = PARAMS.map(m => {
+    const va = a[m.key], vh = h[m.key];
     const diff = vh - va;
-    const mejor = meta.higherIsBetter ? diff > 0 : diff < 0;
+    const mejor = m.hib ? diff > 0 : diff < 0;
     const igual = Math.abs(diff) < 0.001;
-    const diffClass = igual ? 'diff-neu' : mejor ? 'diff-pos' : 'diff-neg';
+    const cls = igual ? 'diff-neu' : mejor ? 'diff-pos' : 'diff-neg';
     const icon = igual ? '—' : mejor ? '▲' : '▼';
-    const diffFmt = meta.tipo === 'pct' || meta.tipo === 'pct_direct'
-      ? (diff > 0 ? '+' : '') + diff.toFixed(2) + '%'
-      : (diff > 0 ? '+' : '') + diff.toFixed(2);
+    const df = (diff>0?'+':'')+diff.toFixed(2)+' '+m.un;
     return `
-    <tr>
-      <td>
-        <div class="param-name">${meta.nombre}
-          <div class="tooltip-wrap">
-            <span class="tooltip-icon">?</span>
-            <span class="tooltip-text">${meta.desc}</span>
-          </div>
+    <div class="param-card">
+      <div class="param-card-header">
+        <div>
+          <div class="param-card-name">${m.nom}</div>
+          <div class="param-card-unit">${m.un} · ${m.desc}</div>
         </div>
-        <div class="param-unit">${meta.unidad}</div>
-      </td>
-      <td><input class="param-input" type="number" step="0.01" value="${va}" onchange="updateParam('actual','${meta.key}',this.value)"></td>
-      <td><input class="param-input historico" type="number" step="0.01" value="${vh}" onchange="updateParam('historico','${meta.key}',this.value)"></td>
-      <td><div class="param-diff ${diffClass}"><span class="trend-icon">${icon}</span> ${diffFmt}</div></td>
-    </tr>`;
+        <div class="param-card-diff ${cls}">${icon} ${df}</div>
+      </div>
+      <div class="param-card-inputs">
+        <div class="param-input-wrap">
+          <div class="param-input-lbl">Actual</div>
+          <input class="param-input" type="number" inputmode="decimal" step="0.01" value="${va}" onchange="updParam('actual','${m.key}',this.value)">
+        </div>
+        <div class="param-input-wrap">
+          <div class="param-input-lbl historico">Histórico mejor</div>
+          <input class="param-input hist" type="number" inputmode="decimal" step="0.01" value="${vh}" onchange="updParam('historico','${m.key}',this.value)">
+        </div>
+      </div>
+    </div>`;
   }).join('');
 
   return `
-  <div class="alert-info">
-    🏆 <strong>Columna "Actual":</strong> cómo está tu granja hoy. <strong>Columna "Histórico mejor":</strong> el mejor desempeño que tu granja ya alcanzó. La diferencia es el dinero que estás dejando de ganar.
+  <div class="alert alert-info">
+    📊 <strong>Actual</strong>: cómo está tu granja hoy. <strong style="color:var(--vg)">Histórico mejor</strong>: el mejor desempeño que ya alcanzaste. La diferencia es el dinero que estás perdiendo.
   </div>
-  <div class="section-card" style="padding:0;overflow:hidden">
-    <div style="padding:20px 24px 0">
-      <div class="section-card-title">Los 14 Parámetros Productivos</div>
-      <div class="section-card-sub">Ingresa tu situación actual vs tu mejor momento histórico</div>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="param-table" style="min-width:520px">
-        <thead>
-          <tr>
-            <th style="width:200px">Parámetro</th>
-            <th class="center" style="width:130px">Actual</th>
-            <th class="center" style="width:130px" style="color:var(--verde-g)">Histórico mejor</th>
-            <th class="center" style="width:100px">Diferencia</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn-secondary" onclick="goTo('sanitario')">← Atrás</button>
-    <button class="btn-primary" onclick="saveParametros()">Ver resultados →</button>
+  <div class="param-cards">${cards}</div>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-secondary" onclick="goTo('sanitario')">← Atrás</button>
+    <button class="btn btn-primary" onclick="saveParametros()">Ver resultados →</button>
   </div>`;
 }
 
-function updateParam(tipo, key, val) {
-  state.params[tipo][key] = parseFloat(val) || 0;
-}
+function updParam(t, k, v) { state.params[t][k] = parseFloat(v)||0; }
 function saveParametros() {
-  state.completedSteps.add('parametros');
-  state.completedSteps.add('resultados');
+  state.done.add('parametros');
+  state.done.add('resultados');
   updateProgress();
   goTo('resultados');
 }
 
-// ─── PAGE 6: RESULTADOS ───
+// ══════════════════════════════════════════════════════════
+// PAGE 6: RESULTADOS
+// ══════════════════════════════════════════════════════════
 function renderResultados() {
-  const { base, resultados, difTotal, totalReal } = calcularSensibilidad();
-  const moneda = state.granja.moneda;
-  const hembras = parseFloat(state.granja.hembras) || 168;
-  const maxDif = Math.max(...resultados.map(r => Math.abs(r.difAnio)));
+  const {base, res, difTotal, total} = sensibilidad();
+  const mon = state.granja.moneda;
+  const h   = parseFloat(state.granja.hembras) || 168;
+  const maxD = Math.max(...res.map(r=>Math.abs(r.dif)), 1);
+  const sumaInd = res.reduce((s,r)=>s+Math.abs(r.dif),0);
 
-  const rows = resultados.map((r, i) => {
-    const pct = maxDif > 0 ? Math.abs(r.difAnio) / maxDif * 100 : 0;
-    const nivel = pct > 60 ? 'danger' : pct > 25 ? 'warning' : 'ok';
-    const posClass = ['rp1','rp2','rp3','rpn','rpn','rpn','rpn','rpn','rpn','rpn','rpn','rpn','rpn','rpn'][i] || 'rpn';
-    const valActual = r.tipo === 'pct' || r.tipo === 'pct_direct' ? r.actual.toFixed(2) + '%' : r.actual.toFixed(2);
-    const valHist = r.tipo === 'pct' || r.tipo === 'pct_direct' ? r.historico.toFixed(2) + '%' : r.historico.toFixed(2);
+  const ranking = res.map((r,i) => {
+    const pct   = Math.abs(r.dif)/maxD*100;
+    const nivel = pct>60?'danger':pct>25?'warning':'ok';
+    const pc    = ['rp1','rp2','rp3'][i]||'rpn';
+    const va    = r.actual.toFixed(2)+' '+r.un;
+    const vh    = r.hist.toFixed(2)+' '+r.un;
     return `
-    <div class="ranking-item">
-      <div class="rank-pos ${posClass}">${i+1}</div>
-      <div class="rank-info">
-        <div class="rank-name">${r.nombre}</div>
-        <div class="rank-detail">Actual: ${valActual} → Histórico: ${valHist}</div>
+    <div class="rank-item">
+      <div class="rank-pos ${pc}">${i+1}</div>
+      <div class="rank-body">
+        <div class="rank-name">${r.nom}</div>
+        <div class="rank-detail">${va} → ${vh}</div>
+        <div class="rank-bar"><div class="rank-bar-fill fill-${nivel}" style="width:${pct}%"></div></div>
       </div>
-      <div class="rank-bar-wrap">
-        <div class="rank-bar-track">
-          <div class="rank-bar-fill fill-${nivel}" style="width:${pct}%"></div>
-        </div>
-      </div>
-      <div class="rank-amount ra-${nivel}">${fmt(r.difAnio, moneda)}</div>
+      <div class="rank-amt ra-${nivel}">${fmt(r.dif,mon)}</div>
     </div>`;
   }).join('');
 
-  const sumaIndividual = resultados.reduce((s, r) => s + Math.abs(r.difAnio), 0);
+  const costos = [
+    ['🌾 Alimento cría',   base.costo_cria_xc],
+    ['🐣 Alimento precebos',base.costo_prec_xc],
+    ['🐗 Alimento ceba',   base.costo_ceba_xc],
+    ['🚛 Flete alimento',  base.flete_xc_total],
+    ['💉 Semen',           base.costo_sem_xc],
+    ['🧬 Genética',        base.costo_gen_xc],
+    ['🩺 Plan sanitario',  base.san_xc],
+    ['👷 Mano de obra',    base.mo_cria_xc + base.mo_dest_xc],
+    ['🔧 Mantenimiento',   base.mant_cria_xc + base.mant_prec_xc + base.mant_ceba_xc],
+    ['🏢 Administración',  base.admon_xc],
+  ].map(([lbl, val]) => {
+    const p = base.costo_total_xc > 0 ? (val/base.costo_total_xc*100).toFixed(1) : 0;
+    return `<div class="cost-row">
+      <span class="cost-lbl">${lbl}</span>
+      <span class="cost-val">${fmt(val,mon)}<span class="cost-pct">${p}%</span></span>
+    </div>`;
+  }).join('');
 
   return `
   <div class="result-hero">
-    <div class="result-total-label">Pérdida anual total identificada</div>
-    <div class="result-total-num">${fmt(difTotal, moneda)}</div>
-    <div class="result-total-usd">${fmtUSD(difTotal)} · ${state.granja.nombre || 'Tu granja'} · ${hembras} hembras</div>
+    <div class="result-lbl">Pérdida anual identificada</div>
+    <div class="result-big">${fmt(difTotal,mon)}</div>
+    <div class="result-usd">${fmtUSD(difTotal)} · ${state.granja.nombre||'Tu granja'} · ${h} hembras</div>
     <div class="result-meta">
-      <div class="result-meta-item">
-        <div class="result-meta-num">${Math.round(base.cerdosVendidos).toLocaleString()}</div>
-        <div class="result-meta-lbl">Cerdos vendidos/año</div>
-      </div>
-      <div class="result-meta-item">
-        <div class="result-meta-num">${fmt(base.costoXKilo, moneda)}</div>
-        <div class="result-meta-lbl">Costo/kg actual</div>
-      </div>
-      <div class="result-meta-item">
-        <div class="result-meta-num">${fmt(base.utilidadXCerdo, moneda)}</div>
-        <div class="result-meta-lbl">Utilidad/cerdo actual</div>
-      </div>
-      <div class="result-meta-item">
-        <div class="result-meta-num">${fmt(difTotal / hembras, moneda)}</div>
-        <div class="result-meta-lbl">Pérdida/hembra/año</div>
-      </div>
+      <div class="rm-item"><div class="rm-num">${Math.round(base.cerdos_vend).toLocaleString()}</div><div class="rm-lbl">Cerdos/año</div></div>
+      <div class="rm-item"><div class="rm-num">${fmt(base.costo_xkilo,mon)}</div><div class="rm-lbl">Costo/kg</div></div>
+      <div class="rm-item"><div class="rm-num">${fmt(base.util_xc,mon)}</div><div class="rm-lbl">Utilidad/cerdo</div></div>
+      <div class="rm-item"><div class="rm-num">${fmt(difTotal/h,mon)}</div><div class="rm-lbl">Pérdida/hembra</div></div>
     </div>
   </div>
 
   <div class="result-note">
-    <strong>⚠️ Nota sobre la interpretación:</strong> Los ${resultados.length} parámetros suman individualmente ${fmt(sumaIndividual, moneda)}, pero la pérdida real cuando todos mejoran juntos es <strong>${fmt(difTotal, moneda)}</strong>. La diferencia ocurre porque los parámetros están encadenados y se afectan entre sí. El número grande es el que importa para tomar decisiones.
+    <strong>⚠️ Interpretación:</strong> Los ${res.length} parámetros individuales suman ${fmt(sumaInd,mon)}, pero la pérdida real es <strong>${fmt(difTotal,mon)}</strong>. La diferencia existe porque los parámetros están encadenados. El número grande es el que importa.
   </div>
 
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-card-num" style="color:var(--verde-g)">${fmt(totalReal.utilidadTotal, moneda)}</div>
-      <div class="summary-card-lbl">Utilidad potencial total</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-num" style="color:var(--rojo-s)">${fmt(base.utilidadTotal, moneda)}</div>
-      <div class="summary-card-lbl">Utilidad actual</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-num" style="color:var(--oro)">${Math.round(((totalReal.utilidadTotal - base.utilidadTotal) / Math.abs(base.utilidadTotal)) * 100)}%</div>
-      <div class="summary-card-lbl">Mejora potencial</div>
-    </div>
+  <div class="sum-grid">
+    <div class="sum-card"><div class="sum-num" style="color:var(--vg)">${fmt(total.util_total,mon)}</div><div class="sum-lbl">Potencial</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--rs)">${fmt(base.util_total,mon)}</div><div class="sum-lbl">Actual</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--oro)">${Math.round((difTotal/Math.abs(base.util_total||1))*100)}%</div><div class="sum-lbl">Mejora</div></div>
   </div>
 
-  <div class="section-card" style="padding:16px">
-    <div style="padding:0 8px 16px">
-      <div class="section-card-title">Ranking de pérdidas por parámetro</div>
-      <div class="section-card-sub">Ordenado de mayor a menor impacto económico</div>
-    </div>
-    ${rows}
+  <div class="card" style="padding:16px">
+    <div class="card-title" style="margin-bottom:4px">Ranking por parámetro</div>
+    <div class="card-sub">De mayor a menor impacto económico</div>
+    ${ranking}
   </div>
 
-  <div class="section-card">
-    <div class="section-card-title">Estructura de costos actual</div>
-    <div class="section-card-sub">Desglose del costo de producción por cerdo vendido</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      ${[
-        ['Alimento cría', base.costoAlimentoCriaXCerdo],
-        ['Alimento precebos', base.costoAlimentoPrecebos],
-        ['Alimento ceba', base.costoAlimentoCeba],
-        ['Semen', base.costoSemenXCerdo],
-        ['Genética', base.costoGeneticaXCerdo],
-        ['Plan sanitario', base.costoSanitarioXCerdo],
-        ['Mano de obra', base.costoMOCriaXCerdo + base.costoMODestetXCerdo],
-        ['Mantenimiento', base.costoMantCriaXCerdo + base.costoMantPreceboXCerdo + base.costoMantCebaXCerdo],
-        ['Administración', base.costoAdmonXCerdo],
-      ].map(([lbl, val]) => {
-        const pct = base.costoTotalXCerdo > 0 ? (val / base.costoTotalXCerdo * 100).toFixed(1) : 0;
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--borde2)">
-          <span style="font-size:13px;color:var(--crema-d)">${lbl}</span>
-          <span style="font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--crema)">${fmt(val, moneda)} <span style="font-size:11px;color:var(--crema-d);font-family:'DM Sans',sans-serif">${pct}%</span></span>
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="margin-top:12px;padding:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:14px;font-weight:600;color:var(--blanco)">COSTO TOTAL / cerdo vendido</span>
-      <span style="font-family:'Fraunces',serif;font-size:20px;font-weight:900;color:var(--oro)">${fmtFull(base.costoTotalXCerdo, moneda)}</span>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:4px">Costos por cerdo vendido</div>
+    <div class="card-sub">Desglose actual de producción</div>
+    ${costos}
+    <div class="cost-total">
+      <span style="font-size:14px;font-weight:600;color:var(--bl)">TOTAL / cerdo vendido</span>
+      <span style="font-family:'Fraunces',serif;font-size:20px;font-weight:900;color:var(--oro)">${fmtFull(base.costo_total_xc)}</span>
     </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn-secondary" onclick="goTo('parametros')">← Ajustar parámetros</button>
-    <button class="btn-primary" onclick="window.print()">Exportar diagnóstico ↓</button>
+    <button class="btn btn-secondary" onclick="goTo('parametros')">← Ajustar</button>
+    <button class="btn btn-primary" onclick="window.print()">↓ Exportar</button>
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 goTo('granja');
 </script>
 </body>
